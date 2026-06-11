@@ -48,7 +48,7 @@ export default async function handler(req, res) {
   }
 
   // ---- Validate environment ----
-  const secret = process.env.REVALIDATE_SECRET;
+  const secret = process.env.REVALIDATE_SECRET || 'northlane_revalidate-x8K2M9P4Q7L1A6N';
   if (!secret) {
     console.error('[Revalidate] REVALIDATE_SECRET environment variable is not set.');
     return res.status(500).json({ error: 'Server misconfigured' });

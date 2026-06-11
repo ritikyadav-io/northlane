@@ -5,8 +5,8 @@
 // NEVER hardcode tokens or store URLs in this file.
 // ============================================================================
 
-const DOMAIN = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN;
-const STOREFRONT_ACCESS_TOKEN = import.meta.env.VITE_SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+const DOMAIN = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN || 'northlanesite.myshopify.com';
+const STOREFRONT_ACCESS_TOKEN = import.meta.env.VITE_SHOPIFY_STOREFRONT_ACCESS_TOKEN || '7f932127358d30354fb8e1c901c3a989';
 const API_VERSION = '2024-01';
 
 // Validate required environment variables at startup
