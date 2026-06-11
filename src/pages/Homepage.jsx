@@ -41,8 +41,14 @@ export default function Homepage() {
         setLoading(true);
         const data = await fetchProducts(20);
         console.log('[Homepage] Raw products fetched from Shopify:', data);
-        // Temporarily disabled filtering to show all products
-        setProducts(data);
+        // Filter out lingerie and wellness correctors (belts) from home view loops
+        const filtered = data.filter(p => {
+          const handle = p.handle.toLowerCase();
+          const isLingerie = handle.includes('lace') || handle.includes('lingerie') || handle.includes('bra') || handle.includes('babydoll') || handle.includes('teddy') || handle.includes('thong');
+          const isWellnessBelt = handle.includes('posture') || handle.includes('spine') || handle.includes('corrector');
+          return !isLingerie && !isWellnessBelt;
+        });
+        setProducts(filtered);
       } catch (err) {
         console.error('Homepage load error:', err);
         setError('Failed to load products. Please try again.');
@@ -55,8 +61,21 @@ export default function Homepage() {
 
   // Filter products by category (matching productType)
   const getFilteredProducts = (category) => {
-    console.log('[Homepage] Bypassing category filter for:', category);
-    return products;
+    if (category === 'All') return products;
+    
+    // Helper to map category names to API product types if they differ slightly
+    const categoryMapping = {
+      'Home Decor': 'Home Decor',
+      'Kitchen and Dining': 'Kitchen & Dining',
+      'Health and Wellness': 'Health & Wellness',
+      'Office and Stationery': 'Office & Stationery',
+      'Photography and Lighting': 'Photography & Lighting',
+      'Womens Fashion': 'Womens Fashion',
+      'Outdoor and Camping': 'Outdoor & Camping'
+    };
+
+    const targetType = categoryMapping[category] || category;
+    return products.filter(p => p.productType && p.productType.toLowerCase() === targetType.toLowerCase());
   };
 
   // Sort products

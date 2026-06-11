@@ -58,10 +58,10 @@ export default function CollectionsPage() {
   const getProcessedProducts = () => {
     let result = [...products];
 
-    // Category Filter - temporarily disabled to show all products
-    // if (selectedCategory !== 'All') {
-    //   result = result.filter(p => p.productType === selectedCategory);
-    // }
+    // Category Filter
+    if (selectedCategory !== 'All') {
+      result = result.filter(p => p.productType === selectedCategory);
+    }
 
     // Min Price Filter
     if (minPrice.trim() !== '') {
