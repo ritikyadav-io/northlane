@@ -33,9 +33,11 @@ export default function Footer() {
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px', padding: 0 }}>
               <li><Link to="/collections/all" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">All Products</Link></li>
               <li><a href="#best-sellers" onClick={(e) => { e.preventDefault(); handleScrollToSection('best-sellers'); }} style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Best Sellers</a></li>
-              <li><Link to="/collections/all" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Home Decor</Link></li>
-              <li><Link to="/collections/all" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Kitchen and Lifestyle</Link></li>
-              <li><Link to="/collections/all" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Health and Wellness</Link></li>
+              <li><Link to="/collections/lingerie-nightwear" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Lingerie & Nightwear</Link></li>
+              <li><Link to="/collections/skincare-creams" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Skincare & Creams</Link></li>
+              <li><Link to="/collections/cosmetics-nails" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Cosmetics & Nails</Link></li>
+              <li><Link to="/collections/wellness-selfcare" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Wellness & Self-Care</Link></li>
+              <li><Link to="/collections/fashion-shoes" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Fashion & Shoes</Link></li>
             </ul>
           </div>
 
@@ -55,7 +57,7 @@ export default function Footer() {
           <div>
             <h4 style={{ color: 'var(--color-bg)', fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px', fontWeight: '700' }}>Company</h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px', padding: 0 }}>
-              <li><a href="#why-choose" onClick={(e) => { e.preventDefault(); handleScrollToSection('why-choose'); }} style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">About Us</a></li>
+              <li><Link to="/pages/about" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">About Us</Link></li>
               <li><Link to="/policies/privacy" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Privacy Policy</Link></li>
               <li><Link to="/policies/terms" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Terms of Service</Link></li>
             </ul>

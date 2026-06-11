@@ -123,7 +123,7 @@ export default function ProductPage({ handle }) {
         }
 
         // Fetch related products (same product type)
-        const allProducts = await fetchProducts(20);
+        const allProducts = await fetchProducts(50);
         const related = allProducts
           .filter(p => p.id !== fetchedProduct.id && p.productType === fetchedProduct.productType)
           .slice(0, 4);

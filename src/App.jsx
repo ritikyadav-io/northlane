@@ -14,6 +14,7 @@ import ProductPage from './pages/ProductPage';
 import CollectionsPage from './pages/CollectionsPage';
 import LandingPage from './pages/LandingPage';
 import PolicyPage from './pages/PolicyPage';
+import AboutUs from './pages/AboutUs';
 import DebugPage from './pages/DebugPage';
 
 function AppContent() {
@@ -40,6 +41,7 @@ function AppContent() {
         {currentView === 'product' && <ProductPage handle={routeParams.handle} />}
         {currentView === 'collections' && <CollectionsPage />}
         {currentView === 'policy' && <PolicyPage type={routeParams.policyType} />}
+        {currentView === 'about' && <AboutUs />}
         {currentView === 'debug' && <DebugPage />}
       </main>
 

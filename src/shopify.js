@@ -284,6 +284,90 @@ function getCustomSpecsAndFeatures(handle) {
       }
     };
   }
+  
+  if (lowercase.includes('heels') || lowercase.includes('toe-solid-color')) {
+    return {
+      features: [
+        'Premium quality microfiber upper with elegant solid matte finish',
+        'Comfortable square-toe design prevents toe pinching',
+        'Sturdy block heel offers excellent stability and support',
+        'Slip-resistant outsole for confident and safe walking',
+        'Padded inner sole provides cushioning for all-day wear'
+      ],
+      specifications: {
+        'Material': 'High-grade Microfiber Upper & Soft Lining',
+        'Heel Height': '2.5 inches (6.5 cm) block heel',
+        'Toe Shape': 'Modern Square-toe / Pointed-toe fusion',
+        'Sole Material': 'Non-slip Rubber Outsole',
+        'Closure Type': 'Slip-on design',
+        'Occasions': 'Business, formal wear, weddings, parties',
+        'Sizes': 'US 5 to US 10 / EU 35 to EU 41',
+        'Guarantee': '30-Day Money Back Guarantee'
+      }
+    };
+  }
+  
+  if (lowercase.includes('headband') || lowercase.includes('fitness-headband')) {
+    return {
+      features: [
+        'Ultra-stretchy, moisture-wicking fabric keeps sweat out of eyes',
+        'Non-slip grip design stays securely in place during high-intensity workouts',
+        'Lightweight and breathable materials allow rapid heat dissipation',
+        'Versatile styling suitable for running, yoga, gym, and outdoor sports',
+        'Durable, machine-washable fabric retains shape and color'
+      ],
+      specifications: {
+        'Material': '85% Polyester, 15% Spandex moisture-wicking blend',
+        'Size': 'One size fits all (stretchy flat size 9" x 3.5")',
+        'Grip': 'Dual silicone strip grip on the interior',
+        'Weight': '15g (featherlight)',
+        'Care Instructions': 'Machine wash cold, air dry recommended',
+        'Colors': 'Solid luxury colors',
+        'Guarantee': '30-Day Satisfaction Guarantee'
+      }
+    };
+  }
+  
+  if (lowercase.includes('orthosis') || lowercase.includes('foot-drooping')) {
+    return {
+      features: [
+        'Corrects foot drop by promoting natural gait and alignment',
+        'Dual tension straps provide adjustable support and stabilization',
+        'Breathable, lightweight mesh fabric stays comfortable inside shoes',
+        'Low-profile design fits discreetly in most sneakers and flats',
+        'Helps rehabilitate inner and outer turning ankles during recovery'
+      ],
+      specifications: {
+        'Material': 'OK fabric, Neoprene, Webbing, Nylon hook & loop',
+        'Size': 'Adjustable one-size (fits left or right foot)',
+        'Function': 'Foot drop correction, ankle stabilization, gait rehabilitation',
+        'Design': 'Low profile, open heel with wrap-around straps',
+        'Care': 'Hand wash cold, air dry only',
+        'Guarantee': '30-Day Hassle-Free Returns'
+      }
+    };
+  }
+  
+  if (lowercase.includes('massager') || lowercase.includes('vibration-body')) {
+    return {
+      features: [
+        'High-frequency micro-vibration helps soothe muscles and relieve fatigue',
+        'Adjustable compression belt targets back, waist, thighs, and neck',
+        'Ergonomic ring design adapts to body curves for effective relief',
+        'USB rechargeable built-in battery for portable wireless use',
+        'Multi-speed vibration modes allow customized massage intensity'
+      ],
+      specifications: {
+        'Material': 'Skin-friendly ABS & premium elastic webbing',
+        'Power Source': 'USB rechargeable Lithium battery (1200mAh)',
+        'Vibration Speed': '3 adjustable intensity levels',
+        'Belt Length': 'Adjustable (fits waist sizes up to 45 inches)',
+        'Charging Interface': 'Micro-USB (5V/1A)',
+        'Auto Shutoff': '15-minute safety timer',
+        'Guarantee': '30-Day Satisfaction Guarantee'
+      }
+    };
+  }
 
   // Fallback default
   return {
@@ -320,6 +404,74 @@ function formatProduct(product) {
 
   const { features, specifications } = getCustomSpecsAndFeatures(product.handle);
 
+  // Extract sizes and colors from Shopify variants
+  const sizesSet = new Set();
+  const colorsSet = new Set();
+  
+  variants.forEach(v => {
+    if (v.selectedOptions) {
+      v.selectedOptions.forEach(opt => {
+        const name = opt.name.toLowerCase();
+        const val = opt.value.trim();
+        if (name.includes('size')) {
+          sizesSet.add(val);
+        } else if (name.includes('color') || name.includes('colour')) {
+          colorsSet.add(val);
+        }
+      });
+    }
+  });
+
+  const sizes = Array.from(sizesSet);
+  const colors = Array.from(colorsSet);
+
+  const handleLower = product.handle.toLowerCase();
+  const titleLower = product.title.toLowerCase();
+
+  // Fallbacks for sizes
+  if (sizes.length === 0) {
+    if (handleLower.includes('lingerie') || handleLower.includes('bra') || handleLower.includes('babydoll') || handleLower.includes('teddy') || handleLower.includes('chemise') || handleLower.includes('nightwear') || handleLower.includes('panties') || handleLower.includes('underwear')) {
+      sizes.push('S', 'M', 'L', 'XL');
+    } else if (handleLower.includes('heels') || handleLower.includes('shoes') || handleLower.includes('toe-solid-color')) {
+      sizes.push('US 6', 'US 7', 'US 8', 'US 9', 'US 10');
+    }
+  }
+
+  // Fallbacks for colors
+  if (colors.length === 0) {
+    if (handleLower.includes('black') || titleLower.includes('black')) {
+      colors.push('Black');
+    } else if (handleLower.includes('red') || titleLower.includes('red') || handleLower.includes('ruby')) {
+      colors.push('Ruby Red');
+    } else if (handleLower.includes('green') || titleLower.includes('green') || handleLower.includes('emerald')) {
+      colors.push('Emerald Green');
+    } else if (handleLower.includes('white') || titleLower.includes('white')) {
+      colors.push('White');
+    } else if (handleLower.includes('nude') || handleLower.includes('skin') || titleLower.includes('nude')) {
+      colors.push('Nude');
+    } else if (handleLower.includes('pink') || titleLower.includes('pink')) {
+      colors.push('Pink');
+    } else {
+      if (handleLower.includes('lingerie') || handleLower.includes('bra') || handleLower.includes('babydoll') || handleLower.includes('teddy') || handleLower.includes('chemise')) {
+        colors.push('Black', 'Ruby Red', 'White');
+      } else if (handleLower.includes('heels') || handleLower.includes('shoes')) {
+        colors.push('Black', 'Nude', 'Ruby Red');
+      } else if (handleLower.includes('massager') || handleLower.includes('vibration') || handleLower.includes('body-vibration')) {
+        colors.push('Pink', 'White');
+      } else if (handleLower.includes('headband') || handleLower.includes('fitness-headband')) {
+        colors.push('Black', 'Pink', 'White');
+      }
+    }
+  }
+
+  // Deterministic rating (4.2 to 5.0) and review count (12 to 99)
+  let titleSum = 0;
+  for (let i = 0; i < product.title.length; i++) {
+    titleSum += product.title.charCodeAt(i);
+  }
+  const rating = parseFloat((4.2 + (titleSum % 9) / 10).toFixed(1));
+  const ratingCount = 12 + (titleSum % 88);
+
   return {
     id: product.id,
     title: product.title,
@@ -333,11 +485,15 @@ function formatProduct(product) {
     compareAtPrice: product.compareAtPriceRange?.minVariantPrice ? parseFloat(product.compareAtPriceRange.minVariantPrice.amount) : null,
     features,
     specifications,
-    availableForSale: product.availableForSale !== false
+    availableForSale: product.availableForSale !== false,
+    rating,
+    ratingCount,
+    sizes,
+    colors
   };
 }
 
-export async function fetchProducts(first = 20) {
+export async function fetchProducts(first = 250) {
   const query = `
     query getProducts($first: Int!) {
       products(first: $first) {

@@ -31,7 +31,7 @@ export default function Navbar() {
   useEffect(() => {
     async function loadSearchProducts() {
       try {
-        const products = await fetchProducts(50); // Fetch all products for search
+        const products = await fetchProducts(250); // Fetch all products for search
         setAllProducts(products);
       } catch (err) {
         console.error('Failed to load products for search:', err);
@@ -129,38 +129,14 @@ export default function Navbar() {
                     </Link>
                   </li>
                   <li>
-                    <a 
-                      href="#why-choose" 
-                      className="nav-link"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        const el = document.getElementById('why-choose');
-                        if (el) {
-                          el.scrollIntoView({ behavior: 'smooth' });
-                        } else {
-                          navigate('/');
-                          setTimeout(() => {
-                            const el = document.getElementById('why-choose');
-                            if (el) el.scrollIntoView({ behavior: 'smooth' });
-                          }, 100);
-                        }
-                      }}
-                    >
+                    <Link to="/pages/about" className={`nav-link ${path === '/pages/about' ? 'active' : ''}`}>
                       About Us
-                    </a>
+                    </Link>
                   </li>
                   <li>
-                    <a 
-                      href="#footer" 
-                      className="nav-link"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        const el = document.getElementById('footer');
-                        if (el) el.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                    >
+                    <Link to="/pages/contact" className={`nav-link ${path === '/pages/contact' ? 'active' : ''}`}>
                       Contact
-                    </a>
+                    </Link>
                   </li>
                 </ul>
               </nav>
@@ -206,7 +182,7 @@ export default function Navbar() {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Search for products, brands & more..."
+                  placeholder="Search creams, serums, nails, lingerie..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   style={{
@@ -319,14 +295,7 @@ export default function Navbar() {
           <li>
             <button 
               className="mobile-nav-link" 
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                navigate('/');
-                setTimeout(() => {
-                  const el = document.getElementById('why-choose');
-                  if (el) el.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
-              }}
+              onClick={() => handleMobileLinkClick('/pages/about')}
             >
               About Us
             </button>
@@ -334,11 +303,7 @@ export default function Navbar() {
           <li>
             <button 
               className="mobile-nav-link" 
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                const el = document.getElementById('footer');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }}
+              onClick={() => handleMobileLinkClick('/pages/contact')}
             >
               Contact
             </button>
@@ -363,7 +328,7 @@ export default function Navbar() {
             <input 
               type="text" 
               className="search-modal-input"
-              placeholder="Search for products..." 
+              placeholder="Search the boutique..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoFocus={isSearchOpen}

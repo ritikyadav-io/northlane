@@ -3,8 +3,48 @@ import { useRouter } from '../Router';
 import { useCart } from '../CartContext';
 import { fetchProducts } from '../shopify';
 
+function mapHandleToCategory(handle) {
+  if (!handle || handle === 'all') return 'All';
+  
+  const mapping = {
+    'lingerie-nightwear': 'Lingerie & Nightwear',
+    'lingerie': 'Lingerie & Nightwear',
+    'nightwear': 'Lingerie & Nightwear',
+    'skincare-creams': 'Skincare & Creams',
+    'creams': 'Skincare & Creams',
+    'skincare': 'Skincare & Creams',
+    'serums': 'Skincare & Creams',
+    'cosmetics-nails': 'Cosmetics & Nails',
+    'cosmetics': 'Cosmetics & Nails',
+    'beauty': 'Cosmetics & Nails',
+    'nails': 'Cosmetics & Nails',
+    'eye': 'Cosmetics & Nails',
+    'wellness-selfcare': 'Wellness & Self-Care',
+    'wellness': 'Wellness & Self-Care',
+    'selfcare': 'Wellness & Self-Care',
+    'fashion-shoes': 'Fashion & Shoes',
+    'shoes': 'Fashion & Shoes',
+    'heels': 'Fashion & Shoes',
+    'fashion': 'Fashion & Shoes'
+  };
+  
+  return mapping[handle.toLowerCase()] || 'All';
+}
+
+const renderStars = (rating) => {
+  const rounded = Math.round(rating);
+  return (
+    <div style={{ display: 'flex', color: '#F59E0B', fontSize: '0.85rem', gap: '2px' }}>
+      {[1, 2, 3, 4, 5].map(star => (
+        <span key={star}>{star <= rounded ? '★' : '☆'}</span>
+      ))}
+    </div>
+  );
+};
+
 export default function CollectionsPage() {
-  const { navigate } = useRouter();
+  const { routeParams, navigate } = useRouter();
+  const { handle } = routeParams;
   const { addToCart } = useCart();
 
   const [products, setProducts] = useState([]);
@@ -16,18 +56,31 @@ export default function CollectionsPage() {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [sortBy, setSortBy] = useState('Featured');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [onSaleOnly, setOnSaleOnly] = useState(false);
+  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
+  const [topRatedOnly, setTopRatedOnly] = useState(false);
   
   // Mobile filter drawer state
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   
   // Pagination
-  const [visibleCount, setVisibleCount] = useState(6);
+  const [visibleCount, setVisibleCount] = useState(24);
+
+  // Sync category state from URL handle
+  useEffect(() => {
+    if (handle) {
+      setSelectedCategory(mapHandleToCategory(handle));
+      setVisibleCount(24);
+    }
+  }, [handle]);
 
   useEffect(() => {
     async function loadCollections() {
       try {
         setLoading(true);
-        const fetched = await fetchProducts(50);
+        const fetched = await fetchProducts(250);
         setProducts(fetched);
         
         // Extract unique productTypes
@@ -58,9 +111,80 @@ export default function CollectionsPage() {
   const getProcessedProducts = () => {
     let result = [...products];
 
-    // Category Filter
+    // Category Filter (Robust, case-insensitive, substring matching)
     if (selectedCategory !== 'All') {
-      result = result.filter(p => p.productType === selectedCategory);
+      result = result.filter(p => {
+        if (!p.productType) return false;
+        const pType = p.productType.toLowerCase();
+        const handle = p.handle.toLowerCase();
+        const title = p.title.toLowerCase();
+        const selCat = selectedCategory.toLowerCase();
+        
+        // Exact matches
+        if (pType === selCat) return true;
+        
+        // Lingerie & Nightwear
+        if (selCat.includes('lingerie') || selCat.includes('nightwear')) {
+          const keywords = ['lace', 'lingerie', 'bra', 'babydoll', 'teddy', 'thong', 'panties', 'womens fashion'];
+          return pType.includes('fashion') || keywords.some(k => handle.includes(k) || title.includes(k));
+        }
+        
+        // Skincare & Creams
+        if (selCat.includes('skin') || selCat.includes('cream') || selCat.includes('serum')) {
+          const keywords = ['cream', 'serum', 'skin', 'lotion', 'moisturizer', 'gel', 'face', 'cleanser'];
+          return pType.includes('cosmetics') || pType.includes('beauty') || keywords.some(k => handle.includes(k) || title.includes(k));
+        }
+        
+        // Cosmetics & Nails
+        if (selCat.includes('cosmetics') || selCat.includes('nail') || selCat.includes('makeup') || selCat.includes('eye')) {
+          const keywords = ['eye', 'nail', 'makeup', 'eyeliner', 'lipstick', 'mascara', 'polish', 'brush'];
+          return pType.includes('cosmetics') || pType.includes('beauty') || keywords.some(k => handle.includes(k) || title.includes(k));
+        }
+        
+        // Wellness & Self-Care
+        if (selCat.includes('wellness') || selCat.includes('care')) {
+          const keywords = ['posture', 'massager', 'fitness', 'spine', 'belt', 'orthosis', 'health', 'relax', 'massage'];
+          return pType.includes('wellness') || pType.includes('lifestyle') || keywords.some(k => handle.includes(k) || title.includes(k));
+        }
+        
+        // Fashion & Shoes
+        if (selCat.includes('shoes') || selCat.includes('fashion') || selCat.includes('heel')) {
+          const keywords = ['heels', 'shoes', 'bag', 'accessories', 'headband', 'jewelry', 'outfit', 'dress'];
+          return pType.includes('lifestyle') || pType.includes('fashion') || keywords.some(k => handle.includes(k) || title.includes(k));
+        }
+        
+        return pType.includes(selCat) || selCat.includes(pType);
+      });
+    }
+
+    // Search Query Filter
+    if (searchQuery.trim() !== '') {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(p => 
+        p.title.toLowerCase().includes(q) || 
+        (p.description && p.description.toLowerCase().includes(q)) ||
+        (p.productType && p.productType.toLowerCase().includes(q))
+      );
+    }
+
+    // On Sale Filter
+    if (onSaleOnly) {
+      result = result.filter(p => p.compareAtPrice && p.compareAtPrice > p.minPrice);
+    }
+
+    // Size Filter
+    if (selectedSize) {
+      result = result.filter(p => p.sizes && p.sizes.includes(selectedSize));
+    }
+
+    // Color Filter
+    if (selectedColor) {
+      result = result.filter(p => p.colors && p.colors.includes(selectedColor));
+    }
+
+    // Top Rated Filter
+    if (topRatedOnly) {
+      result = result.filter(p => p.rating && p.rating >= 4.5);
     }
 
     // Min Price Filter
@@ -155,24 +279,57 @@ export default function CollectionsPage() {
         
         {/* Desktop Sidebar Filters */}
         <aside className="filter-sidebar">
+          {/* Search Filter */}
+          <div className="filter-widget">
+            <h3 className="filter-widget-title">Search</h3>
+            <div style={{ position: 'relative' }}>
+              <input
+                type="text"
+                placeholder="Search products..."
+                className="price-input-field"
+                style={{ width: '100%', paddingLeft: '32px' }}
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setVisibleCount(24); }}
+              />
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }}>
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'none', color: 'var(--color-text-muted)', cursor: 'pointer', fontWeight: 'bold' }}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Category Filter */}
           <div className="filter-widget">
             <h3 className="filter-widget-title">Categories</h3>
             <ul className="filter-links-list">
               <li 
                 className={`filter-link-item ${selectedCategory === 'All' ? 'active' : ''}`}
-                onClick={() => { setSelectedCategory('All'); setVisibleCount(6); }}
+                onClick={() => { setSelectedCategory('All'); setVisibleCount(24); }}
               >
                 <span>All Categories</span>
                 <span>({products.length})</span>
               </li>
               {categories.map(cat => {
-                const count = products.filter(p => p.productType === cat).length;
+                const count = products.filter(p => {
+                  if (!p.productType) return false;
+                  const pType = p.productType.toLowerCase();
+                  const selCat = cat.toLowerCase();
+                  return pType === selCat || pType.includes(selCat) || selCat.includes(pType);
+                }).length;
                 return (
                   <li 
                     key={cat}
                     className={`filter-link-item ${selectedCategory === cat ? 'active' : ''}`}
-                    onClick={() => { setSelectedCategory(cat); setVisibleCount(6); }}
+                    onClick={() => { setSelectedCategory(cat); setVisibleCount(24); }}
                   >
                     <span>{cat}</span>
                     <span>({count})</span>
@@ -182,16 +339,41 @@ export default function CollectionsPage() {
             </ul>
           </div>
 
+          {/* Sale & Rating Filter */}
+          <div className="filter-widget">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: '600', color: 'var(--color-primary)' }}>
+                <input
+                  type="checkbox"
+                  checked={onSaleOnly}
+                  onChange={(e) => { setOnSaleOnly(e.target.checked); setVisibleCount(24); }}
+                  style={{ width: '16px', height: '16px', accentColor: 'var(--color-accent)', cursor: 'pointer' }}
+                />
+                <span>On Sale Only</span>
+              </label>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: '600', color: 'var(--color-primary)' }}>
+                <input
+                  type="checkbox"
+                  checked={topRatedOnly}
+                  onChange={(e) => { setTopRatedOnly(e.target.checked); setVisibleCount(24); }}
+                  style={{ width: '16px', height: '16px', accentColor: 'var(--color-accent)', cursor: 'pointer' }}
+                />
+                <span>Top Rated (4.5+ ★)</span>
+              </label>
+            </div>
+          </div>
+
           {/* Price Range Filter */}
-          <div className="filter-widget" style={{ borderBottom: 'none' }}>
+          <div className="filter-widget">
             <h3 className="filter-widget-title">Price Range</h3>
-            <div className="filter-price-inputs">
+            <div className="filter-price-inputs" style={{ marginBottom: '12px' }}>
               <input
                 type="number"
                 placeholder="Min $"
                 className="price-input-field"
                 value={minPrice}
-                onChange={(e) => { setMinPrice(e.target.value); setVisibleCount(6); }}
+                onChange={(e) => { setMinPrice(e.target.value); setVisibleCount(24); }}
               />
               <span style={{ color: 'var(--color-text-muted)' }}>-</span>
               <input
@@ -199,18 +381,134 @@ export default function CollectionsPage() {
                 placeholder="Max $"
                 className="price-input-field"
                 value={maxPrice}
-                onChange={(e) => { setMaxPrice(e.target.value); setVisibleCount(6); }}
+                onChange={(e) => { setMaxPrice(e.target.value); setVisibleCount(24); }}
               />
             </div>
-            {(minPrice || maxPrice) && (
-              <button 
-                onClick={() => { setMinPrice(''); setMaxPrice(''); }}
-                style={{ fontSize: '0.8rem', color: '#DC2626', fontWeight: '600', marginTop: '12px', textDecoration: 'underline' }}
-              >
-                Clear Price Filter
-              </button>
-            )}
+            
+            {/* Price Presets */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '12px' }}>
+              {[
+                { label: 'Under $20', min: 0, max: 20 },
+                { label: '$20 - $50', min: 20, max: 50 },
+                { label: '$50 & Above', min: 50, max: 9999 }
+              ].map(preset => {
+                const isActive = (minPrice === (preset.min === 0 ? '' : String(preset.min))) && (maxPrice === (preset.max === 9999 ? '' : String(preset.max)));
+                return (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    style={{
+                      padding: '4px 8px',
+                      fontSize: '0.75rem',
+                      borderRadius: '4px',
+                      border: '1px solid var(--color-border)',
+                      backgroundColor: isActive ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
+                      color: isActive ? '#0F172A' : 'var(--color-text)',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => {
+                      setMinPrice(preset.min === 0 ? '' : String(preset.min));
+                      setMaxPrice(preset.max === 9999 ? '' : String(preset.max));
+                      setVisibleCount(24);
+                    }}
+                  >
+                    {preset.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
+
+          {/* Size Filter */}
+          <div className="filter-widget">
+            <h3 className="filter-widget-title">Size</h3>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              {['S', 'M', 'L', 'XL', 'US 6', 'US 7', 'US 8', 'US 9', 'US 10'].map(size => {
+                const isActive = selectedSize === size;
+                return (
+                  <button
+                    key={size}
+                    type="button"
+                    style={{
+                      padding: '6px 10px',
+                      fontSize: '0.75rem',
+                      borderRadius: '4px',
+                      border: '1px solid var(--color-border)',
+                      backgroundColor: isActive ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
+                      color: isActive ? '#0F172A' : 'var(--color-text)',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => { setSelectedSize(prev => prev === size ? '' : size); setVisibleCount(24); }}
+                  >
+                    {size}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Color Filter */}
+          <div className="filter-widget" style={{ borderBottom: 'none' }}>
+            <h3 className="filter-widget-title">Color</h3>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              {['Black', 'Ruby Red', 'Emerald Green', 'White', 'Nude', 'Pink'].map(color => {
+                const isActive = selectedColor === color;
+                return (
+                  <button
+                    key={color}
+                    type="button"
+                    style={{
+                      padding: '6px 10px',
+                      fontSize: '0.75rem',
+                      borderRadius: '4px',
+                      border: '1px solid var(--color-border)',
+                      backgroundColor: isActive ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
+                      color: isActive ? '#0F172A' : 'var(--color-text)',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => { setSelectedColor(prev => prev === color ? '' : color); setVisibleCount(24); }}
+                  >
+                    {color}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Clear All Filters */}
+          {(searchQuery || selectedCategory !== 'All' || minPrice || maxPrice || onSaleOnly || selectedSize || selectedColor || topRatedOnly) && (
+            <div style={{ padding: '15px 0' }}>
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedCategory('All');
+                  setMinPrice('');
+                  setMaxPrice('');
+                  setOnSaleOnly(false);
+                  setSelectedSize('');
+                  setSelectedColor('');
+                  setTopRatedOnly(false);
+                  setVisibleCount(24);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  backgroundColor: 'transparent',
+                  border: '1px solid #DC2626',
+                  color: '#DC2626',
+                  borderRadius: '4px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem'
+                }}
+              >
+                Clear All Filters
+              </button>
+            </div>
+          )}
         </aside>
 
         {/* Product Grid */}
@@ -243,7 +541,10 @@ export default function CollectionsPage() {
                       <div className="product-card-body">
                         <span className="product-card-type">{product.productType}</span>
                         <h3 className="product-card-title">{product.title}</h3>
-                        
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '4px 0 8px' }}>
+                          {renderStars(product.rating || 4.5)}
+                          <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>({product.ratingCount || 28})</span>
+                        </div>
                         <div className="product-card-price-row">
                           <span className="price-current">${product.minPrice.toFixed(2)}</span>
                           {product.compareAtPrice > product.minPrice && (
@@ -269,7 +570,7 @@ export default function CollectionsPage() {
                 <div className="pagination-row">
                   <button
                     className="btn btn-outline"
-                    onClick={() => setVisibleCount(prev => prev + 6)}
+                    onClick={() => setVisibleCount(prev => prev + 24)}
                   >
                     Load More Products
                   </button>
@@ -287,6 +588,9 @@ export default function CollectionsPage() {
                   setSelectedCategory('All');
                   setMinPrice('');
                   setMaxPrice('');
+                  setSearchQuery('');
+                  setOnSaleOnly(false);
+                  setVisibleCount(24);
                 }}
               >
                 Reset Filters
@@ -315,24 +619,57 @@ export default function CollectionsPage() {
           </button>
         </div>
 
+        {/* Search */}
+        <div className="filter-widget">
+          <h3 className="filter-widget-title">Search</h3>
+          <div style={{ position: 'relative' }}>
+            <input
+              type="text"
+              placeholder="Search products..."
+              className="price-input-field"
+              style={{ width: '100%', paddingLeft: '32px' }}
+              value={searchQuery}
+              onChange={(e) => { setSearchQuery(e.target.value); setVisibleCount(24); }}
+            />
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }}>
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'none', color: 'var(--color-text-muted)', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Categories */}
         <div className="filter-widget">
           <h3 className="filter-widget-title">Categories</h3>
           <ul className="filter-links-list">
             <li 
               className={`filter-link-item ${selectedCategory === 'All' ? 'active' : ''}`}
-              onClick={() => { setSelectedCategory('All'); setIsFilterDrawerOpen(false); setVisibleCount(6); }}
+              onClick={() => { setSelectedCategory('All'); setIsFilterDrawerOpen(false); setVisibleCount(24); }}
             >
               <span>All Categories</span>
               <span>({products.length})</span>
             </li>
             {categories.map(cat => {
-              const count = products.filter(p => p.productType === cat).length;
+              const count = products.filter(p => {
+                if (!p.productType) return false;
+                const pType = p.productType.toLowerCase();
+                const selCat = cat.toLowerCase();
+                return pType === selCat || pType.includes(selCat) || selCat.includes(pType);
+              }).length;
               return (
                 <li 
                   key={cat}
                   className={`filter-link-item ${selectedCategory === cat ? 'active' : ''}`}
-                  onClick={() => { setSelectedCategory(cat); setIsFilterDrawerOpen(false); setVisibleCount(6); }}
+                  onClick={() => { setSelectedCategory(cat); setIsFilterDrawerOpen(false); setVisibleCount(24); }}
                 >
                   <span>{cat}</span>
                   <span>({count})</span>
@@ -342,16 +679,41 @@ export default function CollectionsPage() {
           </ul>
         </div>
 
+        {/* Sale & Rating Filter */}
+        <div className="filter-widget">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: '600', color: 'var(--color-primary)' }}>
+              <input
+                type="checkbox"
+                checked={onSaleOnly}
+                onChange={(e) => { setOnSaleOnly(e.target.checked); setVisibleCount(24); }}
+                style={{ width: '16px', height: '16px', accentColor: 'var(--color-accent)', cursor: 'pointer' }}
+              />
+              <span>On Sale Only</span>
+            </label>
+
+            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: '600', color: 'var(--color-primary)' }}>
+              <input
+                type="checkbox"
+                checked={topRatedOnly}
+                onChange={(e) => { setTopRatedOnly(e.target.checked); setVisibleCount(24); }}
+                style={{ width: '16px', height: '16px', accentColor: 'var(--color-accent)', cursor: 'pointer' }}
+              />
+              <span>Top Rated (4.5+ ★)</span>
+            </label>
+          </div>
+        </div>
+
         {/* Price Range */}
-        <div className="filter-widget" style={{ borderBottom: 'none' }}>
+        <div className="filter-widget">
           <h3 className="filter-widget-title">Price Range</h3>
-          <div className="filter-price-inputs" style={{ marginBottom: '16px' }}>
+          <div className="filter-price-inputs" style={{ marginBottom: '12px' }}>
             <input
               type="number"
               placeholder="Min $"
               className="price-input-field"
               value={minPrice}
-              onChange={(e) => { setMinPrice(e.target.value); setVisibleCount(6); }}
+              onChange={(e) => { setMinPrice(e.target.value); setVisibleCount(24); }}
             />
             <span style={{ color: 'var(--color-text-muted)' }}>-</span>
             <input
@@ -359,21 +721,127 @@ export default function CollectionsPage() {
               placeholder="Max $"
               className="price-input-field"
               value={maxPrice}
-              onChange={(e) => { setMaxPrice(e.target.value); setVisibleCount(6); }}
+              onChange={(e) => { setMaxPrice(e.target.value); setVisibleCount(24); }}
             />
           </div>
+
+          {/* Price Presets */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '12px' }}>
+            {[
+              { label: 'Under $20', min: 0, max: 20 },
+              { label: '$20 - $50', min: 20, max: 50 },
+              { label: '$50 & Above', min: 50, max: 9999 }
+            ].map(preset => {
+              const isActive = (minPrice === (preset.min === 0 ? '' : String(preset.min))) && (maxPrice === (preset.max === 9999 ? '' : String(preset.max)));
+              return (
+                <button
+                  key={preset.label}
+                  type="button"
+                  style={{
+                    padding: '4px 8px',
+                    fontSize: '0.75rem',
+                    borderRadius: '4px',
+                    border: '1px solid var(--color-border)',
+                    backgroundColor: isActive ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
+                    color: isActive ? '#0F172A' : 'var(--color-text)',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => {
+                    setMinPrice(preset.min === 0 ? '' : String(preset.min));
+                    setMaxPrice(preset.max === 9999 ? '' : String(preset.max));
+                    setVisibleCount(24);
+                  }}
+                >
+                  {preset.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Size Filter */}
+        <div className="filter-widget">
+          <h3 className="filter-widget-title">Size</h3>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            {['S', 'M', 'L', 'XL', 'US 6', 'US 7', 'US 8', 'US 9', 'US 10'].map(size => {
+              const isActive = selectedSize === size;
+              return (
+                <button
+                  key={size}
+                  type="button"
+                  style={{
+                    padding: '6px 10px',
+                    fontSize: '0.75rem',
+                    borderRadius: '4px',
+                    border: '1px solid var(--color-border)',
+                    backgroundColor: isActive ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
+                    color: isActive ? '#0F172A' : 'var(--color-text)',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => { setSelectedSize(prev => prev === size ? '' : size); setVisibleCount(24); }}
+                >
+                  {size}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Color Filter */}
+        <div className="filter-widget" style={{ borderBottom: 'none' }}>
+          <h3 className="filter-widget-title">Color</h3>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            {['Black', 'Ruby Red', 'Emerald Green', 'White', 'Nude', 'Pink'].map(color => {
+              const isActive = selectedColor === color;
+              return (
+                <button
+                  key={color}
+                  type="button"
+                  style={{
+                    padding: '6px 10px',
+                    fontSize: '0.75rem',
+                    borderRadius: '4px',
+                    border: '1px solid var(--color-border)',
+                    backgroundColor: isActive ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
+                    color: isActive ? '#0F172A' : 'var(--color-text)',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => { setSelectedColor(prev => prev === color ? '' : color); setVisibleCount(24); }}
+                >
+                  {color}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div style={{ padding: '20px 15px' }}>
           <button
             className="btn btn-primary btn-full"
             onClick={() => setIsFilterDrawerOpen(false)}
           >
             Apply Filters
           </button>
-          {(minPrice || maxPrice) && (
+          {(minPrice || maxPrice || searchQuery || selectedCategory !== 'All' || onSaleOnly || selectedSize || selectedColor || topRatedOnly) && (
             <button 
-              onClick={() => { setMinPrice(''); setMaxPrice(''); setIsFilterDrawerOpen(false); }}
-              style={{ fontSize: '0.85rem', color: '#DC2626', fontWeight: '600', marginTop: '16px', display: 'block', margin: '16px auto 0', textDecoration: 'underline' }}
+              onClick={() => {
+                setSelectedCategory('All');
+                setMinPrice('');
+                setMaxPrice('');
+                setSearchQuery('');
+                setOnSaleOnly(false);
+                setSelectedSize('');
+                setSelectedColor('');
+                setTopRatedOnly(false);
+                setIsFilterDrawerOpen(false);
+                setVisibleCount(24);
+              }}
+              style={{ fontSize: '0.85rem', color: '#DC2626', fontWeight: '600', marginTop: '16px', display: 'block', margin: '16px auto 0', textDecoration: 'underline', border: 'none', background: 'none', cursor: 'pointer' }}
             >
-              Clear Price Filter
+              Clear All Filters
             </button>
           )}
         </div>

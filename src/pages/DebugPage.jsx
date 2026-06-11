@@ -33,7 +33,7 @@ export default function DebugPage() {
 
         // 2. Fetch products
         console.log('[Debug] Fetching products...');
-        const fetchedProducts = await fetchProducts(50);
+        const fetchedProducts = await fetchProducts(250);
         setProducts(fetchedProducts);
 
         // 3. Fetch collections

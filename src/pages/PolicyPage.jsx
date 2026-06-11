@@ -159,23 +159,43 @@ export default function PolicyPage({ type }) {
           <div className="contact-layout">
             <div className="contact-info-side">
               <h1 className="policy-title" style={{ marginBottom: '16px' }}>Contact Us</h1>
-              <p style={{ color: 'var(--color-text-muted)', marginBottom: '30px' }}>
-                Have a question about your order, shipping, or returns? We are here to help. Get in touch and we will reply within 12 to 24 hours.
+              <p style={{ color: 'var(--color-text-muted)', marginBottom: '30px', lineHeight: '1.6' }}>
+                Have questions about a lingerie fit, skincare ingredients, order tracking, or return procedures? Our dedicated concierge team is ready to assist you. Get in touch and we will reply within 12 to 24 hours.
               </p>
 
               <div className="contact-details-list">
                 <div className="contact-detail-card">
                   <span className="contact-card-icon">✉</span>
                   <div>
-                    <h3 className="contact-card-title">Email Support</h3>
+                    <h3 className="contact-card-title">General & Order Support</h3>
                     <p className="contact-card-text"><a href="mailto:support@northlane.com">support@northlane.com</a></p>
+                  </div>
+                </div>
+
+                <div className="contact-detail-card">
+                  <span className="contact-card-icon">👙</span>
+                  <div>
+                    <h3 className="contact-card-title">Lingerie Sizing Assistant</h3>
+                    <p className="contact-card-text" style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', margin: 0 }}>
+                      Send us your bust/underbust measurements for sizing suggestions.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="contact-detail-card">
+                  <span className="contact-card-icon">✨</span>
+                  <div>
+                    <h3 className="contact-card-title">Skincare Consultation</h3>
+                    <p className="contact-card-text" style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', margin: 0 }}>
+                      Unsure about skin compatibility? Detail your skin type for personalized advice.
+                    </p>
                   </div>
                 </div>
 
                 <div className="contact-detail-card">
                   <span className="contact-card-icon">⏰</span>
                   <div>
-                    <h3 className="contact-card-title">Response Hours</h3>
+                    <h3 className="contact-card-title">Boutique Support Hours</h3>
                     <p className="contact-card-text">Monday - Friday: 9 AM - 6 PM EST</p>
                   </div>
                 </div>
@@ -183,15 +203,15 @@ export default function PolicyPage({ type }) {
                 <div className="contact-detail-card">
                   <span className="contact-card-icon">📍</span>
                   <div>
-                    <h3 className="contact-card-title">Fulfillment Warehouses</h3>
+                    <h3 className="contact-card-title">Fulfillment Centers</h3>
                     <p className="contact-card-text">Atlanta, Georgia, USA | London, UK</p>
                   </div>
                 </div>
               </div>
 
               <div style={{ marginTop: '30px', padding: '16px', backgroundColor: 'var(--color-bg-secondary)', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
-                <h4 style={{ color: 'var(--color-primary)', fontSize: '0.9rem', marginBottom: '6px', fontWeight: '700' }}>SSL Secure Checkout Guaranteed</h4>
-                <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: 0 }}>Every transaction on our site is encrypted with SSL and verified by Shopify security protocols.</p>
+                <h4 style={{ color: 'var(--color-primary)', fontSize: '0.9rem', marginBottom: '6px', fontWeight: '700' }}>SSL Secure Transaction Guarantees</h4>
+                <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: 0 }}>All transactions are securely routed through Shopify checkout. Card details are never stored.</p>
               </div>
             </div>
 

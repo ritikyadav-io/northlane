@@ -5,14 +5,23 @@ import { fetchProducts } from '../shopify';
 
 const CATEGORIES = [
   'All',
-  'Home Decor',
-  'Kitchen and Dining',
-  'Health and Wellness',
-  'Office and Stationery',
-  'Photography and Lighting',
-  'Womens Fashion',
-  'Outdoor and Camping'
+  'Lingerie & Nightwear',
+  'Skincare & Creams',
+  'Cosmetics & Nails',
+  'Wellness & Self-Care',
+  'Fashion & Shoes'
 ];
+
+const renderStars = (rating) => {
+  const rounded = Math.round(rating);
+  return (
+    <div style={{ display: 'flex', color: '#F59E0B', fontSize: '0.85rem', gap: '2px' }}>
+      {[1, 2, 3, 4, 5].map(star => (
+        <span key={star}>{star <= rounded ? '★' : '☆'}</span>
+      ))}
+    </div>
+  );
+};
 
 export default function Homepage() {
   const { navigate } = useRouter();
@@ -28,6 +37,16 @@ export default function Homepage() {
   // Sorting state
   const [sortBy, setSortBy] = useState('Featured');
   
+  // New Filter states for homepage
+  const [searchQuery, setSearchQuery] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [onSaleOnly, setOnSaleOnly] = useState(false);
+  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
+  const [topRatedOnly, setTopRatedOnly] = useState(false);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+
   // FAQ accordion state
   const [openFaqIdx, setOpenFaqIdx] = useState(null);
 
@@ -39,16 +58,9 @@ export default function Homepage() {
     async function loadProducts() {
       try {
         setLoading(true);
-        const data = await fetchProducts(20);
+        const data = await fetchProducts(250);
         console.log('[Homepage] Raw products fetched from Shopify:', data);
-        // Filter out lingerie and wellness correctors (belts) from home view loops
-        const filtered = data.filter(p => {
-          const handle = p.handle.toLowerCase();
-          const isLingerie = handle.includes('lace') || handle.includes('lingerie') || handle.includes('bra') || handle.includes('babydoll') || handle.includes('teddy') || handle.includes('thong');
-          const isWellnessBelt = handle.includes('posture') || handle.includes('spine') || handle.includes('corrector');
-          return !isLingerie && !isWellnessBelt;
-        });
-        setProducts(filtered);
+        setProducts(data);
       } catch (err) {
         console.error('Homepage load error:', err);
         setError('Failed to load products. Please try again.');
@@ -59,23 +71,103 @@ export default function Homepage() {
     loadProducts();
   }, []);
 
-  // Filter products by category (matching productType)
+  // Filter products by category, search query, sale status, and price
   const getFilteredProducts = (category) => {
-    if (category === 'All') return products;
-    
-    // Helper to map category names to API product types if they differ slightly
-    const categoryMapping = {
-      'Home Decor': 'Home Decor',
-      'Kitchen and Dining': 'Kitchen & Dining',
-      'Health and Wellness': 'Health & Wellness',
-      'Office and Stationery': 'Office & Stationery',
-      'Photography and Lighting': 'Photography & Lighting',
-      'Womens Fashion': 'Womens Fashion',
-      'Outdoor and Camping': 'Outdoor & Camping'
-    };
+    let result = [...products];
 
-    const targetType = categoryMapping[category] || category;
-    return products.filter(p => p.productType && p.productType.toLowerCase() === targetType.toLowerCase());
+    // 1. Category Filter (Robust matching)
+    if (category !== 'All') {
+      result = result.filter(p => {
+        if (!p.productType) return false;
+        const pType = p.productType.toLowerCase();
+        const handle = p.handle.toLowerCase();
+        const title = p.title.toLowerCase();
+        const cat = category.toLowerCase();
+        
+        // Exact matches
+        if (pType === cat) return true;
+        
+        // Lingerie & Nightwear
+        if (cat.includes('lingerie') || cat.includes('nightwear')) {
+          const keywords = ['lace', 'lingerie', 'bra', 'babydoll', 'teddy', 'thong', 'panties', 'womens fashion'];
+          return pType.includes('fashion') || keywords.some(k => handle.includes(k) || title.includes(k));
+        }
+        
+        // Skincare & Creams
+        if (cat.includes('skin') || cat.includes('cream') || cat.includes('serum')) {
+          const keywords = ['cream', 'serum', 'skin', 'lotion', 'moisturizer', 'gel', 'face', 'cleanser'];
+          return pType.includes('cosmetics') || pType.includes('beauty') || keywords.some(k => handle.includes(k) || title.includes(k));
+        }
+        
+        // Cosmetics & Nails
+        if (cat.includes('cosmetics') || cat.includes('nail') || cat.includes('makeup') || cat.includes('eye')) {
+          const keywords = ['eye', 'nail', 'makeup', 'eyeliner', 'lipstick', 'mascara', 'polish', 'brush'];
+          return pType.includes('cosmetics') || pType.includes('beauty') || keywords.some(k => handle.includes(k) || title.includes(k));
+        }
+        
+        // Wellness & Self-Care
+        if (cat.includes('wellness') || cat.includes('care')) {
+          const keywords = ['posture', 'massager', 'fitness', 'spine', 'belt', 'orthosis', 'health', 'relax', 'massage'];
+          return pType.includes('wellness') || pType.includes('lifestyle') || keywords.some(k => handle.includes(k) || title.includes(k));
+        }
+        
+        // Fashion & Shoes
+        if (cat.includes('shoes') || cat.includes('fashion') || cat.includes('heel')) {
+          const keywords = ['heels', 'shoes', 'bag', 'accessories', 'headband', 'jewelry', 'outfit', 'dress'];
+          return pType.includes('lifestyle') || pType.includes('fashion') || keywords.some(k => handle.includes(k) || title.includes(k));
+        }
+        
+        return pType.includes(cat) || cat.includes(pType);
+      });
+    }
+
+    // 2. Search Query Filter
+    if (searchQuery.trim() !== '') {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(p => 
+        p.title.toLowerCase().includes(q) || 
+        (p.description && p.description.toLowerCase().includes(q)) ||
+        (p.productType && p.productType.toLowerCase().includes(q))
+      );
+    }
+
+    // 3. On Sale Filter
+    if (onSaleOnly) {
+      result = result.filter(p => p.compareAtPrice && p.compareAtPrice > p.minPrice);
+    }
+
+    // 3a. Size Filter
+    if (selectedSize) {
+      result = result.filter(p => p.sizes && p.sizes.includes(selectedSize));
+    }
+
+    // 3b. Color Filter
+    if (selectedColor) {
+      result = result.filter(p => p.colors && p.colors.includes(selectedColor));
+    }
+
+    // 3c. Top Rated Filter
+    if (topRatedOnly) {
+      result = result.filter(p => p.rating && p.rating >= 4.5);
+    }
+
+    // 4. Min Price Filter
+    if (minPrice.trim() !== '') {
+      const min = parseFloat(minPrice);
+      if (!isNaN(min)) {
+        result = result.filter(p => p.minPrice >= min);
+      }
+    }
+
+    // 5. Max Price Filter
+    if (maxPrice.trim() !== '') {
+      const max = parseFloat(maxPrice);
+      if (!isNaN(max)) {
+        result = result.filter(p => p.minPrice <= max);
+      }
+    }
+
+    return result;
   };
 
   // Sort products
@@ -110,7 +202,31 @@ export default function Homepage() {
   const getFeaturedCopy = (product) => {
     if (!product) return {};
     const handle = product.handle.toLowerCase();
-    
+    if (handle.includes('lingerie') || handle.includes('bra') || handle.includes('babydoll') || handle.includes('teddy') || handle.includes('thong')) {
+      return {
+        tag: 'Exquisite Lace',
+        headline: 'Luxurious Lingerie & Nightwear Collection',
+        subheadline: 'Crafted with premium soft-touch lace and sheer mesh designed to hug your curves with complete comfort and elegance.',
+        soldText: 'Trending this week'
+      };
+    }
+    if (handle.includes('heels') || handle.includes('toe-solid-color')) {
+      return {
+        tag: 'Premium Footwear',
+        headline: 'Elegant Pointed-Toe Heels',
+        subheadline: 'Solid-color square-toe premium heels combining supreme comfort and high-fashion block heel design.',
+        soldText: 'Chic collection favorite'
+      };
+    }
+    if (handle.includes('massager') || handle.includes('vibration-body')) {
+      return {
+        tag: 'Self-Care Wellness',
+        headline: 'Micro-Vibration Compression Massager',
+        subheadline: 'Relieve daily tension and soothe muscles with high-frequency micro-vibration and adjustable compression.',
+        soldText: 'Wellness top pick'
+      };
+    }
+
     if (handle.includes('tumbler')) {
       return {
         tag: 'Customer Favorite',
@@ -234,12 +350,12 @@ export default function Homepage() {
       {/* SECTION 1: HERO BANNER */}
       <section className="hero">
         <div className="container hero-content">
-          <h1 className="hero-title">Everyday Essentials. Extraordinary Quality.</h1>
+          <h1 className="hero-title">Unveil Your Radiance. Embrace Your Elegance.</h1>
           <p className="hero-subtitle">
-            Curated home, lifestyle, and wellness products delivered to your door across the US and UK
+            Luxury lingerie, boutique skincare, creams, serums, cosmetics, and self-care essentials curated for the modern woman.
           </p>
           <div className="hero-actions">
-            <Link to="/collections/all" className="btn btn-primary">Shop Now</Link>
+            <Link to="/collections/all" className="btn btn-primary">Shop the Boutique</Link>
             <a 
               href="#best-sellers" 
               className="btn btn-outline"
@@ -336,6 +452,10 @@ export default function Homepage() {
                   <div className="product-card-body">
                     <span className="product-card-type">{product.productType}</span>
                     <h3 className="product-card-title">{product.title}</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '4px 0 8px' }}>
+                      {renderStars(product.rating || 4.5)}
+                      <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>({product.ratingCount || 28})</span>
+                    </div>
                     <div className="product-card-price-row">
                       <span className="price-current">${product.minPrice.toFixed(2)}</span>
                       {product.compareAtPrice > product.minPrice && (
@@ -418,9 +538,9 @@ export default function Homepage() {
           </div>
 
           {/* Grid control bar */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', gap: '16px', borderBottom: '1px solid var(--color-border)', paddingBottom: '16px' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '16px', borderBottom: '1px solid var(--color-border)', paddingBottom: '16px' }}>
             {/* Inline filters */}
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
               {CATEGORIES.slice(0, 4).map(cat => (
                 <button
                   key={cat}
@@ -431,9 +551,10 @@ export default function Homepage() {
                     border: '1px solid var(--color-border)',
                     backgroundColor: activeCategory === cat ? 'var(--color-primary)' : 'var(--color-bg)',
                     color: activeCategory === cat ? '#fff' : 'var(--color-text)',
-                    fontWeight: '600'
+                    fontWeight: '600',
+                    cursor: 'pointer'
                   }}
-                  onClick={() => setActiveCategory(cat)}
+                  onClick={() => { setActiveCategory(cat); setSearchQuery(''); setMinPrice(''); setMaxPrice(''); setOnSaleOnly(false); }}
                 >
                   {cat}
                 </button>
@@ -452,20 +573,290 @@ export default function Homepage() {
               )}
             </div>
 
-            {/* Sort Dropdown */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-text-muted)' }}>Sort By:</span>
-              <select
-                className="sort-select"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+            {/* Right Side: Filters toggle & Sort Dropdown */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+              {/* Collapsible Filters Toggle Button */}
+              <button
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '6px 12px',
+                  fontSize: '0.85rem',
+                  borderRadius: '4px',
+                  border: '1px solid var(--color-border)',
+                  backgroundColor: isFilterPanelOpen || searchQuery || minPrice || maxPrice || onSaleOnly || selectedSize || selectedColor || topRatedOnly ? 'var(--color-bg-secondary)' : 'transparent',
+                  color: 'var(--color-primary)',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+                onClick={() => setIsFilterPanelOpen(prev => !prev)}
               >
-                <option>Featured</option>
-                <option>Price Low to High</option>
-                <option>Price High to Low</option>
-              </select>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="4" y1="21" x2="4" y2="14"></line>
+                  <line x1="4" y1="10" x2="4" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12" y2="3"></line>
+                  <line x1="20" y1="21" x2="20" y2="16"></line>
+                  <line x1="20" y1="12" x2="20" y2="3"></line>
+                  <line x1="1" y1="14" x2="7" y2="14"></line>
+                  <line x1="9" y1="8" x2="15" y2="8"></line>
+                  <line x1="17" y1="16" x2="23" y2="16"></line>
+                </svg>
+                <span>Filters {searchQuery || minPrice || maxPrice || onSaleOnly || selectedSize || selectedColor || topRatedOnly ? '•' : ''}</span>
+              </button>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-text-muted)' }}>Sort By:</span>
+                <select
+                  className="sort-select"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                >
+                  <option>Featured</option>
+                  <option>Price Low to High</option>
+                  <option>Price High to Low</option>
+                </select>
+              </div>
             </div>
           </div>
+
+          {/* Collapsible Filters Panel */}
+          {isFilterPanelOpen && (
+            <div 
+              style={{
+                backgroundColor: 'var(--color-bg-secondary)',
+                border: '1px solid var(--color-border)',
+                borderRadius: '8px',
+                padding: '20px',
+                marginBottom: '30px',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '20px'
+              }}
+            >
+              {/* Search Within Category */}
+              <div>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--color-primary)', marginBottom: '8px' }}>Search products</h4>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="text"
+                    placeholder="Type to search..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px 8px 32px',
+                      borderRadius: '4px',
+                      border: '1px solid var(--color-border)',
+                      backgroundColor: 'var(--color-bg)',
+                      color: 'var(--color-text)',
+                      fontSize: '0.85rem',
+                      outline: 'none'
+                    }}
+                  />
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }}>
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'none', color: 'var(--color-text-muted)', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Price Range */}
+              <div>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--color-primary)', marginBottom: '8px' }}>Price Range</h4>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <input
+                    type="number"
+                    placeholder="Min $"
+                    value={minPrice}
+                    onChange={(e) => setMinPrice(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '4px',
+                      border: '1px solid var(--color-border)',
+                      backgroundColor: 'var(--color-bg)',
+                      color: 'var(--color-text)',
+                      fontSize: '0.85rem',
+                      outline: 'none'
+                    }}
+                  />
+                  <span style={{ color: 'var(--color-text-muted)' }}>-</span>
+                  <input
+                    type="number"
+                    placeholder="Max $"
+                    value={maxPrice}
+                    onChange={(e) => setMaxPrice(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '4px',
+                      border: '1px solid var(--color-border)',
+                      backgroundColor: 'var(--color-bg)',
+                      color: 'var(--color-text)',
+                      fontSize: '0.85rem',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Price Presets */}
+              <div>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--color-primary)', marginBottom: '8px' }}>Price Presets</h4>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  {[
+                    { label: 'Under $20', min: 0, max: 20 },
+                    { label: '$20 - $50', min: 20, max: 50 },
+                    { label: '$50 & Above', min: 50, max: 9999 }
+                  ].map(preset => {
+                    const isActive = (minPrice === (preset.min === 0 ? '' : String(preset.min))) && (maxPrice === (preset.max === 9999 ? '' : String(preset.max)));
+                    return (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        style={{
+                          padding: '6px 10px',
+                          fontSize: '0.75rem',
+                          borderRadius: '4px',
+                          border: '1px solid var(--color-border)',
+                          backgroundColor: isActive ? 'var(--color-accent)' : 'var(--color-bg)',
+                          color: isActive ? '#0F172A' : 'var(--color-text)',
+                          fontWeight: '600',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => {
+                          setMinPrice(preset.min === 0 ? '' : String(preset.min));
+                          setMaxPrice(preset.max === 9999 ? '' : String(preset.max));
+                        }}
+                      >
+                        {preset.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Size Filter */}
+              <div>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--color-primary)', marginBottom: '8px' }}>Filter by Size</h4>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  {['S', 'M', 'L', 'XL', 'US 6', 'US 7', 'US 8', 'US 9', 'US 10'].map(size => {
+                    const isActive = selectedSize === size;
+                    return (
+                      <button
+                        key={size}
+                        type="button"
+                        style={{
+                          padding: '6px 10px',
+                          fontSize: '0.75rem',
+                          borderRadius: '4px',
+                          border: '1px solid var(--color-border)',
+                          backgroundColor: isActive ? 'var(--color-accent)' : 'var(--color-bg)',
+                          color: isActive ? '#0F172A' : 'var(--color-text)',
+                          fontWeight: '600',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => setSelectedSize(prev => prev === size ? '' : size)}
+                      >
+                        {size}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Color Filter */}
+              <div>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--color-primary)', marginBottom: '8px' }}>Filter by Color</h4>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  {['Black', 'Ruby Red', 'Emerald Green', 'White', 'Nude', 'Pink'].map(color => {
+                    const isActive = selectedColor === color;
+                    return (
+                      <button
+                        key={color}
+                        type="button"
+                        style={{
+                          padding: '6px 10px',
+                          fontSize: '0.75rem',
+                          borderRadius: '4px',
+                          border: '1px solid var(--color-border)',
+                          backgroundColor: isActive ? 'var(--color-accent)' : 'var(--color-bg)',
+                          color: isActive ? '#0F172A' : 'var(--color-text)',
+                          fontWeight: '600',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => setSelectedColor(prev => prev === color ? '' : color)}
+                      >
+                        {color}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Sale & Rating Filter */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: '600', color: 'var(--color-primary)', marginTop: '4px' }}>
+                  <input
+                    type="checkbox"
+                    checked={onSaleOnly}
+                    onChange={(e) => setOnSaleOnly(e.target.checked)}
+                    style={{ width: '16px', height: '16px', accentColor: 'var(--color-accent)', cursor: 'pointer' }}
+                  />
+                  <span>On Sale Only</span>
+                </label>
+
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: '600', color: 'var(--color-primary)' }}>
+                  <input
+                    type="checkbox"
+                    checked={topRatedOnly}
+                    onChange={(e) => setTopRatedOnly(e.target.checked)}
+                    style={{ width: '16px', height: '16px', accentColor: 'var(--color-accent)', cursor: 'pointer' }}
+                  />
+                  <span>Top Rated Only (4.5+ ★)</span>
+                </label>
+
+                {(searchQuery || minPrice || maxPrice || onSaleOnly || selectedSize || selectedColor || topRatedOnly) && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery('');
+                      setMinPrice('');
+                      setMaxPrice('');
+                      setOnSaleOnly(false);
+                      setSelectedSize('');
+                      setSelectedColor('');
+                      setTopRatedOnly(false);
+                    }}
+                    style={{
+                      fontSize: '0.8rem',
+                      color: '#DC2626',
+                      fontWeight: '600',
+                      textDecoration: 'underline',
+                      border: 'none',
+                      background: 'none',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      padding: '4px 0',
+                      marginTop: '8px'
+                    }}
+                  >
+                    Clear All Filters
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Products List */}
           {sortProducts(getFilteredProducts(activeCategory), sortBy).length > 0 ? (
@@ -494,7 +885,10 @@ export default function Homepage() {
                     <div className="product-card-body">
                       <span className="product-card-type">{product.productType}</span>
                       <h3 className="product-card-title">{product.title}</h3>
-                      
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '4px 0 8px' }}>
+                        {renderStars(product.rating || 4.5)}
+                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>({product.ratingCount || 28})</span>
+                      </div>
                       <div className="product-card-price-row">
                         <span className="price-current">${product.minPrice.toFixed(2)}</span>
                         {product.compareAtPrice > product.minPrice && (
@@ -521,8 +915,22 @@ export default function Homepage() {
               })}
             </div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--color-text-muted)' }}>
-              No products found in this category.
+            <div style={{ textAlign: 'center', padding: '80px 0', border: '1px dashed var(--color-border)', borderRadius: '8px', color: 'var(--color-text-muted)' }}>
+              <p style={{ fontWeight: '600', fontSize: '1.1rem', marginBottom: '8px', color: 'var(--color-primary)' }}>No products match your filters</p>
+              <p style={{ fontSize: '0.9rem' }}>Try clearing some filters or narrowing down your search.</p>
+              <button 
+                className="btn btn-primary"
+                style={{ marginTop: '16px' }}
+                onClick={() => {
+                  setActiveCategory('All');
+                  setSearchQuery('');
+                  setMinPrice('');
+                  setMaxPrice('');
+                  setOnSaleOnly(false);
+                }}
+              >
+                Reset Filters
+              </button>
             </div>
           )}
         </div>
@@ -545,8 +953,8 @@ export default function Homepage() {
                   <circle cx="18.5" cy="18.5" r="2.5"></circle>
                 </svg>
               </span>
-              <h3 className="why-card-title">Fast US and UK Shipping</h3>
-              <p className="why-card-text">Orders delivered in 7 to 15 business days to the US and 10 to 18 business days to the UK.</p>
+              <h3 className="why-card-title">Fast & Discreet Shipping</h3>
+              <p className="why-card-text">Delivered in 7 to 15 business days to the US & UK in secure, unbranded, discreet packaging.</p>
             </div>
 
             <div className="why-card">
@@ -555,8 +963,8 @@ export default function Homepage() {
                   <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
                 </svg>
               </span>
-              <h3 className="why-card-title">30-Day Returns</h3>
-              <p className="why-card-text">Not happy with your order? Return it within 30 days, no questions asked.</p>
+              <h3 className="why-card-title">Hassle-Free Returns</h3>
+              <p className="why-card-text">Not fully satisfied? Return any unused beauty or lingerie product within 30 days.</p>
             </div>
 
             <div className="why-card">
@@ -567,7 +975,7 @@ export default function Homepage() {
                 </svg>
               </span>
               <h3 className="why-card-title">Secure Checkout</h3>
-              <p className="why-card-text">Every transaction is protected with SSL encryption and processed through Shopify.</p>
+              <p className="why-card-text">Every transaction is fully SSL encrypted and securely processed via Shopify checkout.</p>
             </div>
 
             <div className="why-card">
@@ -577,8 +985,8 @@ export default function Homepage() {
                   <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
               </span>
-              <h3 className="why-card-title">Quality Guaranteed</h3>
-              <p className="why-card-text">Every product is carefully selected and reviewed before being listed on our store.</p>
+              <h3 className="why-card-title">Premium Fabric & Ingredients</h3>
+              <p className="why-card-text">Every lace set, cosmetic formulation, and self-care accessory is dermatologically safe and tested.</p>
             </div>
           </div>
         </div>
@@ -618,17 +1026,17 @@ export default function Homepage() {
             {/* Review 1 */}
             <div className="review-card">
               <div className="review-card-header">
-                <span className="reviewer-name">Sarah M.</span>
-                <span className="reviewer-loc">New York, USA</span>
+                <span className="reviewer-name">Jessica L.</span>
+                <span className="reviewer-loc">Miami, USA</span>
               </div>
               <div className="star-rating">
                 {Array(5).fill().map((_, i) => (
                   <span key={i}>★</span>
                 ))}
               </div>
-              <span className="review-product">40oz Insulated Tumbler</span>
+              <span className="review-product">Lace Lingerie Set with Bra and Thong</span>
               <p className="review-text">
-                I take this tumbler everywhere. Keeps my coffee hot through my entire morning commute and my iced drinks cold all afternoon. Absolutely worth every penny.
+                The fit is absolutely perfect! The lace is incredibly soft and comfortable on the skin, and the design is stunning. My new favorite lingerie set!
               </p>
               <span className="verified-badge">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -642,7 +1050,7 @@ export default function Homepage() {
             {/* Review 2 */}
             <div className="review-card">
               <div className="review-card-header">
-                <span className="reviewer-name">James R.</span>
+                <span className="reviewer-name">Ashley P.</span>
                 <span className="reviewer-loc">London, UK</span>
               </div>
               <div className="star-rating">
@@ -650,9 +1058,9 @@ export default function Homepage() {
                   <span key={i}>★</span>
                 ))}
               </div>
-              <span className="review-product">LED Water Ripple Night Light</span>
+              <span className="review-product">Pointed-toe Solid-color High Heels</span>
               <p className="review-text">
-                Bought this for my bedroom and the effect is stunning. The water ripple projection across the ceiling is so relaxing. My wife loves it too.
+                So elegant and surprisingly comfortable for square-toe heels! I wore them for a whole wedding reception and my feet didn't hurt. Highly recommend.
               </p>
               <span className="verified-badge">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -666,18 +1074,17 @@ export default function Homepage() {
             {/* Review 3 */}
             <div className="review-card">
               <div className="review-card-header">
-                <span className="reviewer-name">Emily T.</span>
+                <span className="reviewer-name">Chloe M.</span>
                 <span className="reviewer-loc">Los Angeles, USA</span>
               </div>
               <div className="star-rating">
-                {Array(4).fill().map((_, i) => (
+                {Array(5).fill().map((_, i) => (
                   <span key={i}>★</span>
                 ))}
-                <span style={{color: '#E2E8F0'}}>★</span>
               </div>
               <span className="review-product">Adjustable Back Posture Corrector</span>
               <p className="review-text">
-                I work from home and my posture was terrible. After two weeks of wearing this for a few hours a day I can already feel the difference. Comfortable and discreet under my shirt.
+                As a beauty blogger, I spend hours hunching over editing screens. This corrector is discreet, fits perfectly under my tops, and has significantly reduced my back strain.
               </p>
               <span className="verified-badge">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -691,17 +1098,17 @@ export default function Homepage() {
             {/* Review 4 */}
             <div className="review-card">
               <div className="review-card-header">
-                <span className="reviewer-name">Daniel K.</span>
-                <span className="reviewer-loc">Manchester, UK</span>
+                <span className="reviewer-name">Sophia K.</span>
+                <span className="reviewer-loc">New York, USA</span>
               </div>
               <div className="star-rating">
                 {Array(5).fill().map((_, i) => (
                   <span key={i}>★</span>
                 ))}
               </div>
-              <span className="review-product">Portable Bluetooth Thermal Label Printer</span>
+              <span className="review-product">Lace Babydoll Chemise with Thong</span>
               <p className="review-text">
-                Connects to my phone instantly and prints perfectly. I use it for labelling everything in my home office. Compact and really well made.
+                This chemise is beautiful! The sheer mesh is high-quality and the details are exquisite. Shipping was fast, and the packaging was very discreet.
               </p>
               <span className="verified-badge">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">

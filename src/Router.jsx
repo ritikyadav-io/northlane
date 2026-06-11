@@ -58,6 +58,8 @@ export function RouterProvider({ children }) {
   } else if (path === '/pages/contact') {
     currentView = 'policy';
     routeParams.policyType = 'contact';
+  } else if (path === '/pages/about' || path === '/pages/about-us') {
+    currentView = 'about';
   } else {
     // Fallback to home
     currentView = 'home';
