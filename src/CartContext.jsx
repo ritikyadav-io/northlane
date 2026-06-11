@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { createCheckout, fetchProducts } from './shopify';
+import { createCheckout, fetchProducts, getStoreDomain } from './shopify';
 
 const CartContext = createContext();
 
@@ -110,7 +110,7 @@ export function CartProvider({ children }) {
     } catch (error) {
       console.error('Checkout Redirection Failed, falling back to cart permalink:', error);
       // Fallback permalink in case checkout mutation fails
-      const domain = 'northlanesite.myshopify.com';
+      const domain = getStoreDomain();
       const itemsString = cart.map(item => {
         // Extract raw numeric ID from GraphQL variant GID
         const variantIdMatch = item.variant.id.match(/\/ProductVariant\/(\d+)/);

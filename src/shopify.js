@@ -1,9 +1,31 @@
-const DOMAIN = 'northlanesite.myshopify.com';
-const STOREFRONT_ACCESS_TOKEN = '7f932127358d30354fb8e1c901c3a989';
+// ============================================================================
+// Shopify Storefront API Client — Production-Grade
+// ============================================================================
+// All credentials are loaded from environment variables (VITE_ prefix for Vite).
+// NEVER hardcode tokens or store URLs in this file.
+// ============================================================================
+
+const DOMAIN = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN;
+const STOREFRONT_ACCESS_TOKEN = import.meta.env.VITE_SHOPIFY_STOREFRONT_ACCESS_TOKEN;
 const API_VERSION = '2024-01';
+
+// Validate required environment variables at startup
+if (!DOMAIN || !STOREFRONT_ACCESS_TOKEN) {
+  console.error(
+    '[Shopify] Missing required environment variables.\n' +
+    'Ensure VITE_SHOPIFY_STORE_DOMAIN and VITE_SHOPIFY_STOREFRONT_ACCESS_TOKEN are set in your .env file.'
+  );
+}
+
 const ENDPOINT = `https://${DOMAIN}/api/${API_VERSION}/graphql.json`;
 
 async function shopifyFetch(query, variables = {}) {
+  if (!DOMAIN || !STOREFRONT_ACCESS_TOKEN) {
+    throw new Error(
+      'Shopify API is not configured. Set VITE_SHOPIFY_STORE_DOMAIN and VITE_SHOPIFY_STOREFRONT_ACCESS_TOKEN in .env'
+    );
+  }
+
   try {
     const response = await fetch(ENDPOINT, {
       method: 'POST',
@@ -15,17 +37,17 @@ async function shopifyFetch(query, variables = {}) {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`Shopify API HTTP error: ${response.status} ${response.statusText}`);
     }
 
     const json = await response.json();
     if (json.errors) {
-      console.error('Shopify API GraphQL Errors:', json.errors);
+      console.error('[Shopify] GraphQL Errors:', json.errors);
       throw new Error(json.errors[0].message);
     }
     return json.data;
   } catch (error) {
-    console.error('Shopify Fetch Error:', error);
+    console.error('[Shopify] Fetch Error:', error);
     throw error;
   }
 }
@@ -475,4 +497,9 @@ export async function createCheckout(lineItems) {
   }
   
   return data?.cartCreate?.cart?.checkoutUrl;
+}
+
+// Export the store domain for use in fallback cart URLs
+export function getStoreDomain() {
+  return DOMAIN;
 }
