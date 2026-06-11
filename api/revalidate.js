@@ -71,14 +71,27 @@ export default async function handler(req, res) {
   console.log(`[Revalidate]   Shop:   ${shopifyDomain}`);
   console.log(`[Revalidate]   IP:     ${clientIp}`);
 
+  // ---- Trigger Vercel Deploy Hook if configured ----
+  const deployHookUrl = process.env.VERCEL_DEPLOY_HOOK_URL;
+  let deployTriggered = false;
+  if (deployHookUrl) {
+    try {
+      const fetchResponse = await fetch(deployHookUrl, { method: 'POST' });
+      deployTriggered = fetchResponse.ok;
+      console.log(`[Revalidate] Deploy hook triggered: ${fetchResponse.status} ${fetchResponse.statusText}`);
+    } catch (err) {
+      console.error('[Revalidate] Failed to trigger deploy hook:', err);
+    }
+  } else {
+    console.log('[Revalidate] VERCEL_DEPLOY_HOOK_URL not configured. Skipping deploy trigger.');
+  }
+
   // ---- Success response ----
-  // Vercel will serve this response and, because the deployment is connected
-  // to your Git repo, any Vercel Deploy Hook you configure will trigger a
-  // fresh build automatically.
   return res.status(200).json({
     success: true,
-    message: 'Revalidation triggered',
+    message: 'Revalidation processed',
     topic: shopifyTopic,
+    deployTriggered,
     timestamp
   });
 }

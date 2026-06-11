@@ -42,6 +42,8 @@ export function RouterProvider({ children }) {
 
   if (path === '/' || path === '') {
     currentView = 'home';
+  } else if (path === '/debug') {
+    currentView = 'debug';
   } else if (path.startsWith('/products/')) {
     currentView = 'product';
     routeParams.handle = path.substring('/products/'.length);

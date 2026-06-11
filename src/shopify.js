@@ -41,6 +41,7 @@ async function shopifyFetch(query, variables = {}) {
     }
 
     const json = await response.json();
+    console.log('[Shopify] Raw response:', json);
     if (json.errors) {
       console.error('[Shopify] GraphQL Errors:', json.errors);
       throw new Error(json.errors[0].message);
@@ -331,7 +332,8 @@ function formatProduct(product) {
     minPrice: product.priceRange?.minVariantPrice ? parseFloat(product.priceRange.minVariantPrice.amount) : 0,
     compareAtPrice: product.compareAtPriceRange?.minVariantPrice ? parseFloat(product.compareAtPriceRange.minVariantPrice.amount) : null,
     features,
-    specifications
+    specifications,
+    availableForSale: product.availableForSale !== false
   };
 }
 
@@ -344,6 +346,7 @@ export async function fetchProducts(first = 20) {
             id
             title
             handle
+            availableForSale
             description
             descriptionHtml
             productType
@@ -399,7 +402,9 @@ export async function fetchProducts(first = 20) {
 
   const data = await shopifyFetch(query, { first });
   const rawProducts = flattenConnection(data?.products);
-  return rawProducts.map(formatProduct);
+  // Filter out sold-out products
+  const inStockProducts = rawProducts.filter(p => p.availableForSale !== false);
+  return inStockProducts.map(formatProduct);
 }
 
 export async function fetchProductByHandle(handle) {
@@ -409,6 +414,7 @@ export async function fetchProductByHandle(handle) {
         id
         title
         handle
+        availableForSale
         description
         descriptionHtml
         productType
@@ -503,3 +509,22 @@ export async function createCheckout(lineItems) {
 export function getStoreDomain() {
   return DOMAIN;
 }
+
+export async function fetchCollections(first = 50) {
+  const query = `
+    query getCollections($first: Int!) {
+      collections(first: $first) {
+        edges {
+          node {
+            id
+            title
+            handle
+          }
+        }
+      }
+    }
+  `;
+  const data = await shopifyFetch(query, { first });
+  return flattenConnection(data?.collections);
+}
+
