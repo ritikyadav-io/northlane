@@ -123,11 +123,7 @@ export default function Navbar() {
                       Best Sellers
                     </a>
                   </li>
-                  <li>
-                    <Link to="/collections/all" className="nav-link">
-                      Collections
-                    </Link>
-                  </li>
+
                   <li>
                     <Link to="/pages/about" className={`nav-link ${path === '/pages/about' ? 'active' : ''}`}>
                       About Us

@@ -3,6 +3,8 @@ import { useRouter, Link } from '../Router';
 import { useCart } from '../CartContext';
 import { fetchProducts } from '../shopify';
 import heroImage from '../assets/beauty_hero_lifestyle.png';
+import beforeImage from '../assets/hairy_arm_before.png';
+import afterImage from '../assets/clean_arm_after.png';
 
 const renderStars = (rating) => {
   const rounded = Math.round(rating);
@@ -1105,7 +1107,7 @@ export default function Homepage() {
                 <div className="ba-label">Before</div>
                 <div className="ba-img-wrapper">
                   <img 
-                    src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=400&auto=format&fit=crop&q=80" 
+                    src={beforeImage} 
                     alt="Skin before hair removal spray application"
                   />
                 </div>
@@ -1115,7 +1117,7 @@ export default function Homepage() {
                 <div className="ba-label after">After</div>
                 <div className="ba-img-wrapper">
                   <img 
-                    src="https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=400&auto=format&fit=crop&q=80" 
+                    src={afterImage} 
                     alt="Smooth skin after hair removal spray application"
                   />
                 </div>
