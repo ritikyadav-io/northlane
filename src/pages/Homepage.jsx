@@ -44,60 +44,128 @@ export default function Homepage() {
     loadProducts();
   }, []);
 
-  // Match products from the Shopify catalog or provide premium realistic DTC fallbacks
-  const getDTCProducts = () => {
-    const foamSpray = products.find(p => p.handle.includes('hair-removal-spray') || p.handle.includes('depilatory') || p.title.toLowerCase().includes('foam spray')) || {
-      id: 'mock-foam-spray',
-      title: 'Gentle Hair Removal Foam Spray',
-      handle: '30ml-100ml-hair-removal-spray-depilatory-armpit-hair-and-legs-hair-foam-mousse-and-removal-is-gentle-hair-cream-spray-non-irritating',
-      price: 18.99,
-      compareAtPrice: 24.99,
-      images: ['https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&auto=format&fit=crop&q=80'],
-      productType: 'Body Care',
-      rating: 4.9,
-      reviewCount: 184
-    };
+  // Filter active products from the Shopify store
+  const activeProducts = products.filter(p => p.available);
 
-    const brushCleaner = products.find(p => p.handle.includes('brush-cleaner') || p.title.toLowerCase().includes('brush cleaner')) || {
-      id: 'mock-brush-cleaner',
-      title: 'Electric Makeup Brush Cleaner',
-      handle: 'electric-makeup-brush-cleaner-dryer',
-      price: 29.99,
-      compareAtPrice: 39.99,
-      images: ['https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&auto=format&fit=crop&q=80'],
-      productType: 'Beauty Tools',
-      rating: 4.8,
-      reviewCount: 142
-    };
+  // 1. Dynamic best sellers rotation (3 active products, rotates every 3 days)
+  const getDTCBestSellers = () => {
+    if (activeProducts.length === 0) {
+      // Fallback mocks if no products are active in the store
+      return [
+        {
+          id: 'mock-foam-spray',
+          title: 'Gentle Hair Removal Foam Spray',
+          handle: '30ml-100ml-hair-removal-spray-depilatory-armpit-hair-and-legs-hair-foam-mousse-and-removal-is-gentle-hair-cream-spray-non-irritating',
+          price: 18.99,
+          compareAtPrice: 24.99,
+          images: ['https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&auto=format&fit=crop&q=80'],
+          productType: 'Body Care',
+          rating: 4.9,
+          reviewCount: 184
+        },
+        {
+          id: 'mock-brush-cleaner',
+          title: 'Electric Makeup Brush Cleaner',
+          handle: 'electric-makeup-brush-cleaner-dryer',
+          price: 29.99,
+          compareAtPrice: 39.99,
+          images: ['https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&auto=format&fit=crop&q=80'],
+          productType: 'Beauty Tools',
+          rating: 4.8,
+          reviewCount: 142
+        },
+        {
+          id: 'mock-id-spray',
+          title: 'Hair Removal Identifying Spray',
+          handle: 'hair-identifier-spray-for-face-shaving-skin-body-hair-identifying-spray-moisturizing-and-skin-care-set',
+          price: 16.99,
+          compareAtPrice: 22.99,
+          images: ['https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=600&auto=format&fit=crop&q=80'],
+          productType: 'Skin Care',
+          rating: 4.7,
+          reviewCount: 96
+        }
+      ];
+    }
 
-    const idSpray = products.find(p => p.handle.includes('hair-identifier') || p.handle.includes('identifying-spray') || p.title.toLowerCase().includes('identifying')) || {
-      id: 'mock-identifying-spray',
-      title: 'Hair Removal Identifying Spray',
-      handle: 'hair-identifier-spray-for-face-shaving-skin-body-hair-identifying-spray-moisturizing-and-skin-care-set',
-      price: 16.99,
-      compareAtPrice: 22.99,
-      images: ['https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=600&auto=format&fit=crop&q=80'],
-      productType: 'Skin Care',
-      rating: 4.7,
-      reviewCount: 96
-    };
-
-    const mascara = products.find(p => p.handle.includes('mascara') || p.title.toLowerCase().includes('mascara')) || {
-      id: 'mock-mascara',
-      title: 'Waterproof Volumizing Mascara',
-      handle: 'colorful-volumizing-waterproof-mascara',
-      price: 14.99,
-      compareAtPrice: 19.99,
-      images: ['https://images.unsplash.com/photo-1591017403046-6fec00799763?w=600&auto=format&fit=crop&q=80'],
-      productType: 'Makeup Accessories',
-      rating: 4.9,
-      reviewCount: 208
-    };
-
-    return { foamSpray, brushCleaner, idSpray, mascara };
+    const rotationPeriod = 3; // days
+    const daysSinceEpoch = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+    const rotationIndex = Math.floor(daysSinceEpoch / rotationPeriod);
+    const offset = rotationIndex % activeProducts.length;
+    const shifted = [...activeProducts.slice(offset), ...activeProducts.slice(0, offset)];
+    return shifted.slice(0, 3);
   };
 
-  const { foamSpray, brushCleaner, idSpray, mascara } = getDTCProducts();
+  // 2. Dynamic beauty tools rotation (2 active products, rotates every 3 days)
+  const getDTCBeautyTools = () => {
+    if (activeProducts.length === 0) {
+      return [
+        {
+          id: 'mock-brush-cleaner',
+          title: 'Electric Makeup Brush Cleaner',
+          handle: 'electric-makeup-brush-cleaner-dryer',
+          price: 29.99,
+          compareAtPrice: 39.99,
+          images: ['https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&auto=format&fit=crop&q=80'],
+          productType: 'Beauty Tools',
+          rating: 4.8,
+          reviewCount: 142
+        },
+        {
+          id: 'mock-mascara',
+          title: 'Waterproof Volumizing Mascara',
+          handle: 'colorful-volumizing-waterproof-mascara',
+          price: 14.99,
+          compareAtPrice: 19.99,
+          images: ['https://images.unsplash.com/photo-1591017403046-6fec00799763?w=600&auto=format&fit=crop&q=80'],
+          productType: 'Makeup Accessories',
+          rating: 4.9,
+          reviewCount: 208
+        }
+      ];
+    }
+
+    const tools = activeProducts.filter(p => {
+      const type = (p.productType || '').toLowerCase();
+      const title = p.title.toLowerCase();
+      const handle = p.handle.toLowerCase();
+      return type.includes('tool') || type.includes('beauty') || type.includes('makeup') || 
+             type.includes('cosmetic') || type.includes('hair') ||
+             ['cleaner', 'mascara', 'brush', 'removal', 'spray', 'clipper', 'shaver', 'trimmer']
+               .some(k => title.includes(k) || handle.includes(k));
+    });
+
+    const listToRotate = tools.length > 0 ? tools : activeProducts;
+
+    const rotationPeriod = 3;
+    const daysSinceEpoch = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+    const rotationIndex = Math.floor((daysSinceEpoch + 1) / rotationPeriod);
+    const offset = rotationIndex % listToRotate.length;
+    const shifted = [...listToRotate.slice(offset), ...listToRotate.slice(0, offset)];
+    return shifted.slice(0, 2);
+  };
+
+  // 3. Hair Removal Product - check if active in the store
+  const getHairRemovalProduct = () => {
+    if (activeProducts.length === 0) {
+      return {
+        id: 'mock-foam-spray',
+        title: 'Gentle Hair Removal Foam Spray',
+        handle: '30ml-100ml-hair-removal-spray-depilatory-armpit-hair-and-legs-hair-foam-mousse-and-removal-is-gentle-hair-cream-spray-non-irritating',
+        price: 18.99,
+        compareAtPrice: 24.99,
+        images: ['https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&auto=format&fit=crop&q=80'],
+        productType: 'Body Care',
+        rating: 4.9,
+        reviewCount: 184
+      };
+    }
+    return activeProducts.find(p => p.handle.includes('hair-removal-spray') || p.handle.includes('depilatory') || p.title.toLowerCase().includes('foam spray'));
+  };
+
+  const bestSellers = getDTCBestSellers();
+  const beautyTools = getDTCBeautyTools();
+  const foamSpray = getHairRemovalProduct();
 
   const handleAddProduct = (e, product) => {
     e.stopPropagation();
@@ -893,110 +961,50 @@ export default function Homepage() {
           </div>
 
           <div className="best-sellers-grid">
-            {/* Product 1: Hair Removal Foam Spray */}
-            <div 
-              className="dtc-card"
-              onClick={() => navigate(`/products/${foamSpray.handle}`)}
-            >
-              <span className="card-badge">Save 24%</span>
-              <div className="card-img-wrapper">
-                <img 
-                  src={foamSpray.images[0]} 
-                  alt={foamSpray.title} 
-                  className="card-img"
-                />
-              </div>
-              <div className="card-body">
-                <span className="card-category">{foamSpray.productType}</span>
-                <h3 className="card-title">{foamSpray.title}</h3>
-                <div className="star-rating-row">
-                  {renderStars(foamSpray.rating)}
-                  <span className="review-count-text">({foamSpray.reviewCount})</span>
-                </div>
-                <div className="card-price-row">
-                  <span className="price-curr">${foamSpray.price || foamSpray.minPrice || 18.99}</span>
-                  {(foamSpray.compareAtPrice > (foamSpray.price || foamSpray.minPrice)) && (
-                    <span className="price-orig">${foamSpray.compareAtPrice}</span>
-                  )}
-                </div>
-                <button 
-                  className="btn-card-add"
-                  onClick={(e) => handleAddProduct(e, foamSpray)}
-                >
-                  Add To Cart
-                </button>
-              </div>
-            </div>
+            {bestSellers.map(product => {
+              const price = product.price || product.minPrice;
+              const compareAt = product.compareAtPrice;
+              const discount = (compareAt && compareAt > price) 
+                ? Math.round(((compareAt - price) / compareAt) * 100)
+                : 0;
 
-            {/* Product 2: Electric Makeup Brush Cleaner */}
-            <div 
-              className="dtc-card"
-              onClick={() => navigate(`/products/${brushCleaner.handle}`)}
-            >
-              <span className="card-badge">Save 25%</span>
-              <div className="card-img-wrapper">
-                <img 
-                  src={brushCleaner.images[0]} 
-                  alt={brushCleaner.title} 
-                  className="card-img"
-                />
-              </div>
-              <div className="card-body">
-                <span className="card-category">{brushCleaner.productType}</span>
-                <h3 className="card-title">{brushCleaner.title}</h3>
-                <div className="star-rating-row">
-                  {renderStars(brushCleaner.rating)}
-                  <span className="review-count-text">({brushCleaner.reviewCount})</span>
-                </div>
-                <div className="card-price-row">
-                  <span className="price-curr">${brushCleaner.price || brushCleaner.minPrice || 29.99}</span>
-                  {(brushCleaner.compareAtPrice > (brushCleaner.price || brushCleaner.minPrice)) && (
-                    <span className="price-orig">${brushCleaner.compareAtPrice}</span>
-                  )}
-                </div>
-                <button 
-                  className="btn-card-add"
-                  onClick={(e) => handleAddProduct(e, brushCleaner)}
+              return (
+                <div 
+                  key={product.id} 
+                  className="dtc-card"
+                  onClick={() => navigate(`/products/${product.handle}`)}
                 >
-                  Add To Cart
-                </button>
-              </div>
-            </div>
-
-            {/* Product 3: Hair Removal Identifying Spray */}
-            <div 
-              className="dtc-card"
-              onClick={() => navigate(`/products/${idSpray.handle}`)}
-            >
-              <span className="card-badge">Save 26%</span>
-              <div className="card-img-wrapper">
-                <img 
-                  src={idSpray.images[0]} 
-                  alt={idSpray.title} 
-                  className="card-img"
-                />
-              </div>
-              <div className="card-body">
-                <span className="card-category">{idSpray.productType}</span>
-                <h3 className="card-title">{idSpray.title}</h3>
-                <div className="star-rating-row">
-                  {renderStars(idSpray.rating)}
-                  <span className="review-count-text">({idSpray.reviewCount})</span>
+                  {discount > 0 && <span className="card-badge">Save {discount}%</span>}
+                  <div className="card-img-wrapper">
+                    <img 
+                      src={product.images[0]} 
+                      alt={product.title} 
+                      className="card-img"
+                    />
+                  </div>
+                  <div className="card-body">
+                    <span className="card-category">{product.productType || 'Body Care'}</span>
+                    <h3 className="card-title">{product.title}</h3>
+                    <div className="star-rating-row">
+                      {renderStars(product.rating || 4.8)}
+                      <span className="review-count-text">({product.reviewCount || 120})</span>
+                    </div>
+                    <div className="card-price-row">
+                      <span className="price-curr">${price.toFixed(2)}</span>
+                      {compareAt > price && (
+                        <span className="price-orig">${compareAt.toFixed(2)}</span>
+                      )}
+                    </div>
+                    <button 
+                      className="btn-card-add"
+                      onClick={(e) => handleAddProduct(e, product)}
+                    >
+                      Add To Cart
+                    </button>
+                  </div>
                 </div>
-                <div className="card-price-row">
-                  <span className="price-curr">${idSpray.price || idSpray.minPrice || 16.99}</span>
-                  {(idSpray.compareAtPrice > (idSpray.price || idSpray.minPrice)) && (
-                    <span className="price-orig">${idSpray.compareAtPrice}</span>
-                  )}
-                </div>
-                <button 
-                  className="btn-card-add"
-                  onClick={(e) => handleAddProduct(e, idSpray)}
-                >
-                  Add To Cart
-                </button>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -1065,68 +1073,70 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* SECTION 4: HAIR REMOVAL FEATURE SECTION */}
-      <section className="hair-removal-section">
-        <div className="container">
-          <div className="feature-split">
-            {/* Left Column: Benefits */}
-            <div className="feature-content">
-              <span className="feature-tag">Best Seller</span>
-              <h2 className="feature-title">Smooth Skin Made Simple</h2>
-              
-              <div className="benefit-list">
-                <div className="benefit-item">
-                  <span className="benefit-icon">✓</span>
-                  <span className="benefit-text">Fast application</span>
+      {/* SECTION 4: HAIR REMOVAL FEATURE SECTION (ONLY RENDER IF ACTIVE IN STORE) */}
+      {foamSpray && (
+        <section className="hair-removal-section">
+          <div className="container">
+            <div className="feature-split">
+              {/* Left Column: Benefits */}
+              <div className="feature-content">
+                <span className="feature-tag">Best Seller</span>
+                <h2 className="feature-title">Smooth Skin Made Simple</h2>
+                
+                <div className="benefit-list">
+                  <div className="benefit-item">
+                    <span className="benefit-icon">✓</span>
+                    <span className="benefit-text">Fast application</span>
+                  </div>
+                  <div className="benefit-item">
+                    <span className="benefit-icon">✓</span>
+                    <span className="benefit-text">Gentle on skin</span>
+                  </div>
+                  <div className="benefit-item">
+                    <span className="benefit-icon">✓</span>
+                    <span className="benefit-text">Easy at-home use</span>
+                  </div>
+                  <div className="benefit-item">
+                    <span className="benefit-icon">✓</span>
+                    <span className="benefit-text">Designed for everyday confidence</span>
+                  </div>
                 </div>
-                <div className="benefit-item">
-                  <span className="benefit-icon">✓</span>
-                  <span className="benefit-text">Gentle on skin</span>
-                </div>
-                <div className="benefit-item">
-                  <span className="benefit-icon">✓</span>
-                  <span className="benefit-text">Easy at-home use</span>
-                </div>
-                <div className="benefit-item">
-                  <span className="benefit-icon">✓</span>
-                  <span className="benefit-text">Designed for everyday confidence</span>
-                </div>
+
+                <button 
+                  onClick={() => navigate(`/products/${foamSpray.handle}`)}
+                  className="btn-dtc-primary"
+                >
+                  Get Smooth Skin Now
+                </button>
               </div>
 
-              <button 
-                onClick={() => navigate(`/products/${foamSpray.handle}`)}
-                className="btn-dtc-primary"
-              >
-                Get Smooth Skin Now
-              </button>
-            </div>
-
-            {/* Right Column: Before / After Comparison */}
-            <div className="before-after-box">
-              <div className="ba-card">
-                <div className="ba-label">Before</div>
-                <div className="ba-img-wrapper">
-                  <img 
-                    src={beforeImage} 
-                    alt="Skin before hair removal spray application"
-                  />
+              {/* Right Column: Before / After Comparison */}
+              <div className="before-after-box">
+                <div className="ba-card">
+                  <div className="ba-label">Before</div>
+                  <div className="ba-img-wrapper">
+                    <img 
+                      src={beforeImage} 
+                      alt="Skin before hair removal spray application"
+                    />
+                  </div>
+                  <div className="ba-desc">Unwanted body hair</div>
                 </div>
-                <div className="ba-desc">Unwanted body hair</div>
-              </div>
-              <div className="ba-card">
-                <div className="ba-label after">After</div>
-                <div className="ba-img-wrapper">
-                  <img 
-                    src={afterImage} 
-                    alt="Smooth skin after hair removal spray application"
-                  />
+                <div className="ba-card">
+                  <div className="ba-label after">After</div>
+                  <div className="ba-img-wrapper">
+                    <img 
+                      src={afterImage} 
+                      alt="Smooth skin after hair removal spray application"
+                    />
+                  </div>
+                  <div className="ba-desc">Perfectly smooth & soft</div>
                 </div>
-                <div className="ba-desc">Perfectly smooth & soft</div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* SECTION 5: BEAUTY TOOLS SECTION */}
       <section className="beauty-tools-section">
@@ -1139,61 +1149,38 @@ export default function Homepage() {
           </div>
 
           <div className="horizontal-tools-grid">
-            {/* Card 1: Makeup Brush Cleaner */}
-            <div 
-              className="horizontal-card"
-              onClick={() => navigate(`/products/${brushCleaner.handle}`)}
-            >
-              <div className="h-img-wrapper">
-                <img 
-                  src={brushCleaner.images[0]} 
-                  alt={brushCleaner.title} 
-                  className="h-img"
-                />
-              </div>
-              <div className="h-body">
-                <h3 className="h-title">{brushCleaner.title}</h3>
-                <div className="star-rating-row" style={{ marginBottom: '8px' }}>
-                  {renderStars(brushCleaner.rating)}
-                </div>
-                <span className="h-price">${brushCleaner.price || brushCleaner.minPrice || 29.99}</span>
-                <button 
-                  className="btn-dtc-primary"
-                  style={{ padding: '10px 16px', fontSize: '0.8rem' }}
-                  onClick={(e) => handleAddProduct(e, brushCleaner)}
+            {beautyTools.map(product => {
+              const price = product.price || product.minPrice;
+              return (
+                <div 
+                  key={product.id}
+                  className="horizontal-card"
+                  onClick={() => navigate(`/products/${product.handle}`)}
                 >
-                  Shop Now
-                </button>
-              </div>
-            </div>
-
-            {/* Card 2: Mascara */}
-            <div 
-              className="horizontal-card"
-              onClick={() => navigate(`/products/${mascara.handle}`)}
-            >
-              <div className="h-img-wrapper">
-                <img 
-                  src={mascara.images[0]} 
-                  alt={mascara.title} 
-                  className="h-img"
-                />
-              </div>
-              <div className="h-body">
-                <h3 className="h-title">{mascara.title}</h3>
-                <div className="star-rating-row" style={{ marginBottom: '8px' }}>
-                  {renderStars(mascara.rating)}
+                  <div className="h-img-wrapper">
+                    <img 
+                      src={product.images[0]} 
+                      alt={product.title} 
+                      className="h-img"
+                    />
+                  </div>
+                  <div className="h-body">
+                    <h3 className="h-title">{product.title}</h3>
+                    <div className="star-rating-row" style={{ marginBottom: '8px' }}>
+                      {renderStars(product.rating || 4.8)}
+                    </div>
+                    <span className="h-price">${price.toFixed(2)}</span>
+                    <button 
+                      className="btn-dtc-primary"
+                      style={{ padding: '10px 16px', fontSize: '0.8rem' }}
+                      onClick={(e) => handleAddProduct(e, product)}
+                    >
+                      Shop Now
+                    </button>
+                  </div>
                 </div>
-                <span className="h-price">${mascara.price || mascara.minPrice || 14.99}</span>
-                <button 
-                  className="btn-dtc-primary"
-                  style={{ padding: '10px 16px', fontSize: '0.8rem' }}
-                  onClick={(e) => handleAddProduct(e, mascara)}
-                >
-                  Shop Now
-                </button>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </div>
       </section>
