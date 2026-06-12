@@ -80,8 +80,8 @@ function getCustomSpecsAndFeatures(handle) {
         'Run Time': '5 to 24 hours depending on brightness',
         'Waterproof Rating': 'IPX4 splashproof',
         'Weight': '260g',
-        'Shipping': 'Free US/UK tracked delivery (7-15 business days)',
-        'Guarantee': '30-Day Hassle-Free Returns'
+        'Shipping': 'Free US tracked delivery (5-12 business days)',
+        'Guarantee': '7-Day Hassle-Free Returns'
       }
     };
   }
@@ -104,7 +104,7 @@ function getCustomSpecsAndFeatures(handle) {
         'Control Interface': 'Remote control & Touch button sensor',
         'Dimensions': '5.2" x 5.2" x 4.8"',
         'Certifications': 'CE, FCC, RoHS certified',
-        'Guarantee': '30-Day Hassle-Free Money Back'
+        'Guarantee': '7-Day Hassle-Free Money Back'
       }
     };
   }
@@ -127,7 +127,7 @@ function getCustomSpecsAndFeatures(handle) {
         'Capacity': '40oz (approx. 1180ml)',
         'Straw': 'Reusable Tritan straw included',
         'Care Instructions': 'Hand wash recommended (lid/straw dishwasher safe)',
-        'Guarantee': '30-Day Satisfaction Guarantee'
+        'Guarantee': '7-Day Satisfaction Guarantee'
       }
     };
   }
@@ -150,7 +150,7 @@ function getCustomSpecsAndFeatures(handle) {
         'Control Option': 'Remote control & smart touch sensor',
         'Dimensions': '4.3" x 4.3" x 4.5"',
         'Applications': 'Bedroom bedside lamp, living room ambiance, party light',
-        'Guarantee': '30-Day Hassle-Free Returns'
+        'Guarantee': '7-Day Hassle-Free Returns'
       }
     };
   }
@@ -173,7 +173,7 @@ function getCustomSpecsAndFeatures(handle) {
         'Dimensions': '5.1" x 3.1" x 1.1"',
         'Supported Languages': 'English, Spanish, French, German, Chinese, Japanese',
         'Print Speed': '30mm/s - 50mm/s',
-        'Guarantee': '30-Day Satisfaction Guarantee'
+        'Guarantee': '7-Day Satisfaction Guarantee'
       }
     };
   }
@@ -195,7 +195,7 @@ function getCustomSpecsAndFeatures(handle) {
         'Ergonomics': 'Discreet design (fits comfortably under clothing)',
         'Care': 'Hand wash cold, air dry only',
         'Benefits': 'Relieves back, neck, and shoulder tension',
-        'Guarantee': '30-Day Hassle-Free Money Back'
+        'Guarantee': '7-Day Hassle-Free Money Back'
       }
     };
   }
@@ -217,7 +217,7 @@ function getCustomSpecsAndFeatures(handle) {
         'Color Temp': '3 modes (Warm White, Natural White, Cool White)',
         'Stand Design': 'Flexible 360-degree goose-neck arm',
         'Cable Length': '4.8 ft with inline controller',
-        'Guarantee': '30-Day Satisfaction Guarantee'
+        'Guarantee': '7-Day Satisfaction Guarantee'
       }
     };
   }
@@ -238,7 +238,7 @@ function getCustomSpecsAndFeatures(handle) {
         'Sizing': 'S, M, L, XL (Detailed size chart in description)',
         'Care': 'Hand wash cold inside out, dry flat',
         'Stretch': 'Medium elasticity',
-        'Guarantee': '30-Day Returns Policy'
+        'Guarantee': '7-Day Returns Policy'
       }
     };
   }
@@ -259,7 +259,7 @@ function getCustomSpecsAndFeatures(handle) {
         'Sizing': 'S, M, L, XL, XXL available',
         'Care': 'Machine wash cold in mesh laundry bag, hang dry',
         'Stretch': 'High elasticity',
-        'Guarantee': '30-Day Return Window'
+        'Guarantee': '7-Day Return Window'
       }
     };
   }
@@ -280,7 +280,7 @@ function getCustomSpecsAndFeatures(handle) {
         'Sizing': 'True to size (S, M, L, XL)',
         'Care': 'Hand wash cold, do not bleach, air dry',
         'Color Options': 'Classic Black, Ruby Red, Emerald Green',
-        'Guarantee': '30-Day Hassle-Free Returns'
+        'Guarantee': '7-Day Hassle-Free Returns'
       }
     };
   }
@@ -302,7 +302,7 @@ function getCustomSpecsAndFeatures(handle) {
         'Closure Type': 'Slip-on design',
         'Occasions': 'Business, formal wear, weddings, parties',
         'Sizes': 'US 5 to US 10 / EU 35 to EU 41',
-        'Guarantee': '30-Day Money Back Guarantee'
+        'Guarantee': '7-Day Money Back Guarantee'
       }
     };
   }
@@ -323,7 +323,7 @@ function getCustomSpecsAndFeatures(handle) {
         'Weight': '15g (featherlight)',
         'Care Instructions': 'Machine wash cold, air dry recommended',
         'Colors': 'Solid luxury colors',
-        'Guarantee': '30-Day Satisfaction Guarantee'
+        'Guarantee': '7-Day Satisfaction Guarantee'
       }
     };
   }
@@ -343,7 +343,7 @@ function getCustomSpecsAndFeatures(handle) {
         'Function': 'Foot drop correction, ankle stabilization, gait rehabilitation',
         'Design': 'Low profile, open heel with wrap-around straps',
         'Care': 'Hand wash cold, air dry only',
-        'Guarantee': '30-Day Hassle-Free Returns'
+        'Guarantee': '7-Day Hassle-Free Returns'
       }
     };
   }
@@ -364,7 +364,7 @@ function getCustomSpecsAndFeatures(handle) {
         'Belt Length': 'Adjustable (fits waist sizes up to 45 inches)',
         'Charging Interface': 'Micro-USB (5V/1A)',
         'Auto Shutoff': '15-minute safety timer',
-        'Guarantee': '30-Day Satisfaction Guarantee'
+        'Guarantee': '7-Day Satisfaction Guarantee'
       }
     };
   }
@@ -372,7 +372,7 @@ function getCustomSpecsAndFeatures(handle) {
   // Fallback default
   return {
     features: [
-      'Premium quality materials carefully selected for US & UK markets',
+      'Premium quality materials carefully selected for the US market',
       'Designed for maximum durability, style, and everyday functionality',
       'Fully tracked delivery with secure packaging to protect your order',
       'BPA-free, non-toxic, and environmentally conscious design standards',
@@ -380,12 +380,90 @@ function getCustomSpecsAndFeatures(handle) {
     ],
     specifications: {
       'Origin': 'Selected Premium Import',
-      'Shipping': 'US & UK tracked delivery (7-15 business days)',
-      'Guarantee': '30-Day Hassle-Free Money Back',
+      'Shipping': 'US tracked delivery (5-12 business days)',
+      'Guarantee': '7-Day Hassle-Free Money Back',
       'Quality Standard': 'CE, RoHS and FCC certified where applicable',
       'Care': 'Wipe clean with soft damp cloth / Follow package insert'
     }
   };
+}
+
+function generateProductFeatures(product) {
+  if (!product) return [];
+  const title = (product.title || '').toLowerCase();
+  const desc = (product.description || '').toLowerCase();
+  const handle = (product.handle || '').toLowerCase();
+
+  // Specific scannable benefits (exactly 3 features, max 3-5 words each)
+  if (handle.includes('lingerie') || title.includes('lingerie') || title.includes('bra')) {
+    return ['Soft Premium Lace', 'Comfortable Underwire Support', 'Matching Thong Set'];
+  }
+  if (handle.includes('babydoll') || title.includes('babydoll') || handle.includes('chemise')) {
+    return ['Sheer Flowy Mesh', 'Adjustable Cross Straps', 'Flattering A-Line Cut'];
+  }
+  if (handle.includes('teddy') || title.includes('teddy') || title.includes('bodysuit')) {
+    return ['Plunging V-Neckline', 'Snap-Crotch Bottom', 'Stretchy Curve Hugging'];
+  }
+  if (handle.includes('heel') || title.includes('heel') || title.includes('shoes')) {
+    return ['Stable Block Heel', 'Padded Cushion Sole', 'Anti-Slip Rubber Grip'];
+  }
+  if (handle.includes('headband') || title.includes('headband')) {
+    return ['Moisture Wicking Fabric', 'Non-Slip Interior Grip', 'Stretchy Universal Fit'];
+  }
+  if (handle.includes('pilates') || title.includes('pilates') || handle.includes('resistance-band')) {
+    return ['180lbs Adjustable Tension', 'Full Body Training', 'Portable Gym Set'];
+  }
+  if (handle.includes('tumbler') || title.includes('tumbler')) {
+    return ['24h Ice Cold', 'Spill-Proof Lid', 'Cup Holder Friendly'];
+  }
+  if (handle.includes('doll') || title.includes('doll') || title.includes('toy')) {
+    return ['Handmade Knitted Decor', 'Romantic Festive Accent', 'Soft Premium Wool'];
+  }
+  if (handle.includes('bracelet') || title.includes('bracelet') || title.includes('watch') || handle.includes('smartwatch')) {
+    return ['Heart Rate Monitor', 'Step & Calorie Tracker', 'Smart Notifications'];
+  }
+  if (handle.includes('lantern') || title.includes('lantern') || handle.includes('light') || title.includes('lamp')) {
+    return ['USB Type-C Rechargeable', 'Warm Ambient Glow', 'IPX4 Splash Resistant'];
+  }
+  if (handle.includes('ripple') || title.includes('ripple')) {
+    return ['Dynamic Wave Effect', '16 RGB Colors', 'Stepless Dimming Controls'];
+  }
+  if (handle.includes('printer') || title.includes('printer') || handle.includes('label')) {
+    return ['Inkless Thermal Printing', 'Bluetooth Instant Connect', 'Compact Pocket Size'];
+  }
+  if (handle.includes('posture') || title.includes('posture') || handle.includes('spine')) {
+    return ['Spine & Neck Align', 'Adjustable Chest Strap', 'Discreet Under Clothing'];
+  }
+  if (handle.includes('orthosis') || title.includes('orthosis') || handle.includes('foot')) {
+    return ['Corrects Foot Drop', 'Dual Tension Straps', 'Low Profile Fit'];
+  }
+  if (handle.includes('massager') || title.includes('massager')) {
+    return ['Soothing Micro-Vibrations', 'Adjustable Wrap Belt', 'USB Wireless Recharge'];
+  }
+
+  // Fallbacks: dynamically extract from description if available
+  const list = [];
+  if (desc.includes('material') || desc.includes('fabric') || desc.includes('cotton')) {
+    list.push('Premium Quality Material');
+  }
+  if (desc.includes('easy') || desc.includes('simple') || desc.includes('install')) {
+    list.push('Easy To Use');
+  }
+  if (desc.includes('recharge') || desc.includes('battery') || desc.includes('usb')) {
+    list.push('USB Rechargeable');
+  }
+  if (desc.includes('waterproof') || desc.includes('ipx') || desc.includes('resistant')) {
+    list.push('Water Resistant');
+  }
+  if (desc.includes('fit') || desc.includes('elastic') || desc.includes('stretch')) {
+    list.push('Comfortable Custom Fit');
+  }
+
+  if (list.length < 3) list.push('Premium Curated Design');
+  if (list.length < 3) list.push('High Quality Build');
+  if (list.length < 3) list.push('Fast Tracked Shipping');
+
+  return list.slice(0, 3);
 }
 
 function formatProduct(product) {
@@ -402,7 +480,8 @@ function formatProduct(product) {
     availableForSale: v.availableForSale
   }));
 
-  const { features, specifications } = getCustomSpecsAndFeatures(product.handle);
+  const { specifications } = getCustomSpecsAndFeatures(product.handle);
+  const features = generateProductFeatures(product);
 
   // Extract sizes and colors from Shopify variants
   const sizesSet = new Set();
@@ -479,6 +558,7 @@ function formatProduct(product) {
     description: product.description,
     descriptionHtml: product.descriptionHtml,
     productType: product.productType || 'Uncategorized',
+    tags: product.tags || [],
     images: images,
     variants: variants,
     minPrice: product.priceRange?.minVariantPrice ? parseFloat(product.priceRange.minVariantPrice.amount) : 0,
@@ -506,6 +586,7 @@ export async function fetchProducts(first = 250) {
             description
             descriptionHtml
             productType
+            tags
             priceRange {
               minVariantPrice {
                 amount
@@ -574,6 +655,7 @@ export async function fetchProductByHandle(handle) {
         description
         descriptionHtml
         productType
+        tags
         priceRange {
           minVariantPrice {
             amount

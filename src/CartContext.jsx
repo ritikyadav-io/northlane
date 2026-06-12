@@ -112,9 +112,27 @@ export function CartProvider({ children }) {
       // Fallback permalink in case checkout mutation fails
       const domain = getStoreDomain();
       const itemsString = cart.map(item => {
+        let gid = item.variant.id;
+        // Decode base64 if it is base64 encoded
+        if (gid.startsWith('Z2lkOi')) {
+          try {
+            gid = window.atob(gid);
+          } catch (e) {
+            console.error('Failed to decode base64 variant GID:', e);
+          }
+        } else if (!gid.includes('/') && /^[A-Za-z0-9+/=]+$/.test(gid)) {
+          try {
+            const decoded = window.atob(gid);
+            if (decoded.includes('ProductVariant')) {
+              gid = decoded;
+            }
+          } catch (e) {
+            // ignore decoding errors
+          }
+        }
         // Extract raw numeric ID from GraphQL variant GID
-        const variantIdMatch = item.variant.id.match(/\/ProductVariant\/(\d+)/);
-        const rawId = variantIdMatch ? variantIdMatch[1] : item.variant.id;
+        const variantIdMatch = gid.match(/\/ProductVariant\/(\d+)/);
+        const rawId = variantIdMatch ? variantIdMatch[1] : gid;
         return `${rawId}:${item.quantity}`;
       }).join(',');
       window.location.href = `https://${domain}/cart/${itemsString}`;

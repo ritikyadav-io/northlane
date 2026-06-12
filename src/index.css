@@ -454,38 +454,45 @@ input, select, textarea {
 }
 
 .category-scroll {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 14px !important; /* 12-16px spacing */
+  overflow-x: auto !important;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 4px;
+  scrollbar-width: none !important; /* Hide scrollbar Firefox */
+  -ms-overflow-style: none !important; /* Hide scrollbar IE/Edge */
+  align-items: center !important;
+  width: 100%;
+  padding-bottom: 2px !important;
 }
 
 .category-scroll::-webkit-scrollbar {
-  height: 4px;
-}
-
-.category-scroll::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 2px;
+  display: none !important;
 }
 
 .category-pill {
-  white-space: nowrap;
-  padding: 8px 16px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border-radius: 50px;
-  background-color: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  color: var(--color-text);
+  white-space: nowrap !important;
+  padding: 0 16px !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  border-radius: 50px !important;
+  background-color: var(--color-bg-secondary) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 38px !important; /* Equal height */
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .category-pill:hover, .category-pill.active {
-  background-color: var(--color-primary);
-  color: var(--color-bg);
-  border-color: var(--color-primary);
+  background-color: var(--color-primary) !important;
+  color: var(--color-bg) !important;
+  border-color: var(--color-primary) !important;
 }
 
 /* PRODUCT CARD */
@@ -539,6 +546,7 @@ input, select, textarea {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: top;
   transition: transform 0.4s ease;
 }
 
@@ -644,6 +652,7 @@ input, select, textarea {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: top;
 }
 
 .split-content-side {
@@ -1120,6 +1129,7 @@ input, select, textarea {
   width: 80px;
   height: 80px;
   object-fit: cover;
+  object-position: top;
   border-radius: 4px;
   background-color: var(--color-bg-secondary);
 }
@@ -1359,6 +1369,7 @@ input, select, textarea {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: top;
   transition: opacity 0.3s ease;
 }
 
@@ -1387,6 +1398,7 @@ input, select, textarea {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: top;
 }
 
 /* Right Column details */
@@ -1635,7 +1647,7 @@ input, select, textarea {
 
 @media (min-width: 992px) {
   .collections-layout {
-    grid-template-columns: 260px 1fr;
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1645,7 +1657,7 @@ input, select, textarea {
 
 @media (min-width: 992px) {
   .filter-sidebar {
-    display: block;
+    display: none;
   }
 }
 
@@ -1705,7 +1717,7 @@ input, select, textarea {
 
 @media (min-width: 992px) {
   .filter-mobile-bar {
-    justify-content: flex-end;
+    justify-content: space-between;
   }
 }
 
@@ -1732,7 +1744,7 @@ input, select, textarea {
 
 @media (min-width: 992px) {
   .filter-drawer-toggle-btn {
-    display: none;
+    display: inline-flex;
   }
 }
 
@@ -2273,12 +2285,28 @@ input, select, textarea {
     margin-bottom: 8px !important;
   }
   .split-bullets {
-    margin-bottom: 8px !important;
+    margin-bottom: 12px !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    list-style: none !important;
+    padding: 0 !important;
   }
   .split-bullet-item {
-    font-size: 0.78rem !important;
-    margin-bottom: 4px !important;
-    gap: 6px !important;
+    font-size: 0.75rem !important;
+    margin-bottom: 0 !important;
+    gap: 4px !important;
+    background-color: var(--color-bg-secondary) !important;
+    border: 1px solid var(--color-border) !important;
+    padding: 6px 10px !important;
+    border-radius: 4px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+  .split-bullet-item .bullet-check svg {
+    width: 12px !important;
+    height: 12px !important;
+    margin-top: 0 !important;
   }
   .split-cta-row {
     gap: 12px !important;
@@ -2361,8 +2389,9 @@ input, select, textarea {
     padding: 8px 0 !important;
   }
   .category-pill {
-    padding: 5px 10px !important;
-    font-size: 0.75rem !important;
+    padding: 0 14px !important;
+    font-size: 0.8rem !important;
+    height: 34px !important;
   }
 
   /* ===== PRODUCT GRID ===== */
@@ -2626,5 +2655,11 @@ input, select, textarea {
   }
   .mobile-sticky-add-to-cart {
     padding: 8px;
+  }
+}
+
+@media (min-width: 768px) {
+  .mobile-only-categories {
+    display: none !important;
   }
 }

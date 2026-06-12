@@ -96,7 +96,7 @@ export default function AboutUs() {
               <div style={{ color: 'var(--color-accent)', fontSize: '1.25rem', fontWeight: 'bold' }}>✈️</div>
               <div>
                 <h4 style={{ color: 'var(--color-primary)', fontSize: '0.95rem', fontWeight: '700', margin: '0 0 4px' }}>Tracked Shipping</h4>
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', margin: 0, lineHeight: '1.4' }}>Free tracked shipping to the United States and United Kingdom on all qualified orders.</p>
+                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', margin: 0, lineHeight: '1.4' }}>Free tracked shipping to the United States on all qualified orders.</p>
               </div>
             </div>
 
@@ -104,8 +104,8 @@ export default function AboutUs() {
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
               <div style={{ color: 'var(--color-accent)', fontSize: '1.25rem', fontWeight: 'bold' }}>💝</div>
               <div>
-                <h4 style={{ color: 'var(--color-primary)', fontSize: '0.95rem', fontWeight: '700', margin: '0 0 4px' }}>30-Day Happiness</h4>
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', margin: 0, lineHeight: '1.4' }}>If you aren't completely in love with your purchase, return it within 30 days for a full refund or exchange.</p>
+                <h4 style={{ color: 'var(--color-primary)', fontSize: '0.95rem', fontWeight: '700', margin: '0 0 4px' }}>7-Day Happiness</h4>
+                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', margin: 0, lineHeight: '1.4' }}>If you aren't completely in love with your purchase, return it within 7 days for a full refund or exchange.</p>
               </div>
             </div>
           </div>

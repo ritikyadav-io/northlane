@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
-
 const ANNOUNCEMENTS = [
   'Free Shipping on US orders over $15',
-  'Free Shipping on UK orders over $20',
-  '30-Day Hassle-Free Returns',
+  '7-Day Hassle-Free Returns',
   'Secure Checkout — SSL Encrypted',
-  'Trusted by Customers Across the US and UK'
+  'Trusted by Thousands of Happy US Customers'
 ];
-
 export default function AnnouncementBar() {
   const [index, setIndex] = useState(0);
 

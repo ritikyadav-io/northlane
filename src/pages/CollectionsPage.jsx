@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from '../Router';
 import { useCart } from '../CartContext';
 import { fetchProducts } from '../shopify';
@@ -10,15 +10,18 @@ function mapHandleToCategory(handle) {
     'lingerie-nightwear': 'Lingerie & Nightwear',
     'lingerie': 'Lingerie & Nightwear',
     'nightwear': 'Lingerie & Nightwear',
-    'skincare-creams': 'Skincare & Creams',
-    'creams': 'Skincare & Creams',
-    'skincare': 'Skincare & Creams',
-    'serums': 'Skincare & Creams',
-    'cosmetics-nails': 'Cosmetics & Nails',
-    'cosmetics': 'Cosmetics & Nails',
-    'beauty': 'Cosmetics & Nails',
-    'nails': 'Cosmetics & Nails',
-    'eye': 'Cosmetics & Nails',
+    'beauty-tools-accessories': 'Beauty Tools & Accessories',
+    'beauty-tools': 'Beauty Tools & Accessories',
+    'accessories': 'Beauty Tools & Accessories',
+    'beauty': 'Beauty Tools & Accessories',
+    'skincare-creams': 'Beauty Tools & Accessories',
+    'creams': 'Beauty Tools & Accessories',
+    'skincare': 'Beauty Tools & Accessories',
+    'serums': 'Beauty Tools & Accessories',
+    'cosmetics-nails': 'Beauty Tools & Accessories',
+    'cosmetics': 'Beauty Tools & Accessories',
+    'nails': 'Beauty Tools & Accessories',
+    'eye': 'Beauty Tools & Accessories',
     'wellness-selfcare': 'Wellness & Self-Care',
     'wellness': 'Wellness & Self-Care',
     'selfcare': 'Wellness & Self-Care',
@@ -29,6 +32,71 @@ function mapHandleToCategory(handle) {
   };
   
   return mapping[handle.toLowerCase()] || 'All';
+}
+
+function matchProductToCategory(product, category) {
+  if (!product.productType) return false;
+  const pType = product.productType.toLowerCase();
+  const handle = product.handle.toLowerCase();
+  const title = product.title.toLowerCase();
+  const cat = category.toLowerCase();
+
+  // Exact matches
+  if (pType === cat) return true;
+
+  // Lingerie & Nightwear
+  if (cat.includes('lingerie') || cat.includes('nightwear')) {
+    const keywords = ['lingerie', 'bra', 'babydoll', 'teddy', 'thong', 'panties', 'chemise', 'nightwear'];
+    return keywords.some(k => handle.includes(k) || title.includes(k));
+  }
+
+  // Beauty Tools & Accessories
+  if (cat.includes('beauty') || cat.includes('tool') || cat.includes('accessories')) {
+    const keywords = [
+      'brush-cleaner', 'makeup', 'massager', 'hair-identifier', 
+      'mascara', 'hair-removal', 'depilatory', 'ear-wax', 
+      'eyelash', 'skincare', 'cosmetics', 'brush', 'slimming'
+    ];
+    // Exclude lingerie
+    const isLingerie = ['lingerie', 'bra', 'babydoll', 'teddy', 'thong', 'panties', 'chemise', 'nightwear']
+      .some(k => handle.includes(k) || title.includes(k));
+    if (isLingerie) return false;
+
+    return pType.includes('beauty') || pType.includes('makeup') || pType.includes('cosmetics') || keywords.some(k => handle.includes(k) || title.includes(k));
+  }
+
+  // Wellness & Self-Care
+  if (cat.includes('wellness') || cat.includes('care')) {
+    const keywords = [
+      'tumbler', 'pilates', 'headband', 'fitness', 'bracelet', 
+      'massager', 'ear-wax', 'posture', 'spine', 'belt', 
+      'orthosis', 'health', 'relax', 'massage'
+    ];
+    // Exclude lingerie
+    const isLingerie = ['lingerie', 'bra', 'babydoll', 'teddy', 'thong', 'panties', 'chemise', 'nightwear']
+      .some(k => handle.includes(k) || title.includes(k));
+    if (isLingerie) return false;
+
+    // Exclude fashion/shoes/heels
+    const isFashionOrHeels = ['heels', 'shoes', 'jumpsuit', 'dress']
+      .some(k => handle.includes(k) || title.includes(k));
+    if (isFashionOrHeels) return false;
+
+    return pType.includes('wellness') || pType.includes('fitness') || pType.includes('lifestyle') || keywords.some(k => handle.includes(k) || title.includes(k));
+  }
+
+  // Fashion & Shoes
+  if (cat.includes('shoes') || cat.includes('fashion') || cat.includes('heel')) {
+    const keywords = ['heels', 'shoes', 'jumpsuit', 'bag', 'accessories', 'headband', 'jewelry', 'outfit', 'dress', 'doll', 'couple doll', 'decor'];
+    // Exclude lingerie
+    const isLingerie = ['lingerie', 'bra', 'babydoll', 'teddy', 'thong', 'panties', 'chemise', 'nightwear']
+      .some(k => handle.includes(k) || title.includes(k));
+    if (isLingerie) return false;
+
+    return pType.includes('fashion') || pType.includes('shoes') || pType.includes('lifestyle') || pType.includes('decor') || keywords.some(k => handle.includes(k) || title.includes(k));
+  }
+
+  return pType.includes(cat) || cat.includes(pType);
 }
 
 const renderStars = (rating) => {
@@ -42,13 +110,24 @@ const renderStars = (rating) => {
   );
 };
 
+const CATEGORIES = [
+  'All',
+  'Lingerie & Nightwear',
+  'Beauty Tools & Accessories',
+  'Wellness & Self-Care',
+  'Fashion & Shoes'
+];
+
 export default function CollectionsPage() {
   const { routeParams, navigate } = useRouter();
   const { handle } = routeParams;
   const { addToCart } = useCart();
 
+  const categoryScrollRef = useRef(null);
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [categories, setCategories] = useState([]);
   
   // Filter states
@@ -77,6 +156,15 @@ export default function CollectionsPage() {
   }, [handle]);
 
   useEffect(() => {
+    if (categoryScrollRef.current) {
+      const activeEl = categoryScrollRef.current.querySelector('.category-pill.active');
+      if (activeEl) {
+        activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }
+  }, [selectedCategory]);
+
+  useEffect(() => {
     async function loadCollections() {
       try {
         setLoading(true);
@@ -93,6 +181,7 @@ export default function CollectionsPage() {
         setCategories(types);
       } catch (err) {
         console.error('Failed to load collections:', err);
+        setError(err.message || 'Failed to load collections');
       } finally {
         setLoading(false);
       }
@@ -113,48 +202,7 @@ export default function CollectionsPage() {
 
     // Category Filter (Robust, case-insensitive, substring matching)
     if (selectedCategory !== 'All') {
-      result = result.filter(p => {
-        if (!p.productType) return false;
-        const pType = p.productType.toLowerCase();
-        const handle = p.handle.toLowerCase();
-        const title = p.title.toLowerCase();
-        const selCat = selectedCategory.toLowerCase();
-        
-        // Exact matches
-        if (pType === selCat) return true;
-        
-        // Lingerie & Nightwear
-        if (selCat.includes('lingerie') || selCat.includes('nightwear')) {
-          const keywords = ['lace', 'lingerie', 'bra', 'babydoll', 'teddy', 'thong', 'panties', 'womens fashion'];
-          return pType.includes('fashion') || keywords.some(k => handle.includes(k) || title.includes(k));
-        }
-        
-        // Skincare & Creams
-        if (selCat.includes('skin') || selCat.includes('cream') || selCat.includes('serum')) {
-          const keywords = ['cream', 'serum', 'skin', 'lotion', 'moisturizer', 'gel', 'face', 'cleanser'];
-          return pType.includes('cosmetics') || pType.includes('beauty') || keywords.some(k => handle.includes(k) || title.includes(k));
-        }
-        
-        // Cosmetics & Nails
-        if (selCat.includes('cosmetics') || selCat.includes('nail') || selCat.includes('makeup') || selCat.includes('eye')) {
-          const keywords = ['eye', 'nail', 'makeup', 'eyeliner', 'lipstick', 'mascara', 'polish', 'brush'];
-          return pType.includes('cosmetics') || pType.includes('beauty') || keywords.some(k => handle.includes(k) || title.includes(k));
-        }
-        
-        // Wellness & Self-Care
-        if (selCat.includes('wellness') || selCat.includes('care')) {
-          const keywords = ['posture', 'massager', 'fitness', 'spine', 'belt', 'orthosis', 'health', 'relax', 'massage'];
-          return pType.includes('wellness') || pType.includes('lifestyle') || keywords.some(k => handle.includes(k) || title.includes(k));
-        }
-        
-        // Fashion & Shoes
-        if (selCat.includes('shoes') || selCat.includes('fashion') || selCat.includes('heel')) {
-          const keywords = ['heels', 'shoes', 'bag', 'accessories', 'headband', 'jewelry', 'outfit', 'dress'];
-          return pType.includes('lifestyle') || pType.includes('fashion') || keywords.some(k => handle.includes(k) || title.includes(k));
-        }
-        
-        return pType.includes(selCat) || selCat.includes(pType);
-      });
+      result = result.filter(p => matchProductToCategory(p, selectedCategory));
     }
 
     // Search Query Filter
@@ -219,6 +267,30 @@ export default function CollectionsPage() {
   const filteredProducts = getProcessedProducts();
   const paginatedProducts = filteredProducts.slice(0, visibleCount);
 
+  if (error) {
+    return (
+      <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px', padding: '40px 24px', textAlign: 'center' }}>
+        <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'var(--color-bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--color-border)' }}>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <div style={{ maxWidth: '400px' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--color-primary)', marginBottom: '8px' }}>Storefront Connection Error</h2>
+          <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)', lineHeight: '1.5' }}>
+            We're unable to connect to the Shopify storefront at the moment. Please verify your internet connection or try again later.
+          </p>
+          <p style={{ fontSize: '0.8rem', color: 'var(--color-accent)', marginTop: '8px', fontFamily: 'monospace' }}>Error: {error}</p>
+        </div>
+        <button onClick={() => window.location.reload()} className="btn btn-primary" style={{ padding: '10px 24px' }}>
+          Retry Connection
+        </button>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
@@ -232,11 +304,29 @@ export default function CollectionsPage() {
     <div className="container" style={{ padding: '40px 24px 80px' }}>
       
       {/* Title */}
-      <div style={{ marginBottom: '30px' }}>
+      <div style={{ marginBottom: '20px' }}>
         <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--color-primary)', marginBottom: '8px' }}>All Products</h1>
         <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem' }}>
           Showing {filteredProducts.length} premium dropshipping products
         </p>
+      </div>
+
+      {/* Mobile Category Navigation (Horizontal Scroll) */}
+      <div className="category-bar mobile-only-categories" style={{ borderBottom: 'none', padding: '0 0 16px 0', margin: '-10px 0 20px 0' }}>
+        <div className="category-scroll" ref={categoryScrollRef}>
+          {CATEGORIES.map(cat => (
+            <button
+              key={cat}
+              className={`category-pill ${selectedCategory === cat ? 'active' : ''}`}
+              onClick={() => {
+                setSelectedCategory(cat);
+                setVisibleCount(24);
+              }}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Mobile control bar */}
@@ -318,13 +408,8 @@ export default function CollectionsPage() {
                 <span>All Categories</span>
                 <span>({products.length})</span>
               </li>
-              {categories.map(cat => {
-                const count = products.filter(p => {
-                  if (!p.productType) return false;
-                  const pType = p.productType.toLowerCase();
-                  const selCat = cat.toLowerCase();
-                  return pType === selCat || pType.includes(selCat) || selCat.includes(pType);
-                }).length;
+              {CATEGORIES.slice(1).map(cat => {
+                const count = products.filter(p => matchProductToCategory(p, cat)).length;
                 return (
                   <li 
                     key={cat}
@@ -658,13 +743,8 @@ export default function CollectionsPage() {
               <span>All Categories</span>
               <span>({products.length})</span>
             </li>
-            {categories.map(cat => {
-              const count = products.filter(p => {
-                if (!p.productType) return false;
-                const pType = p.productType.toLowerCase();
-                const selCat = cat.toLowerCase();
-                return pType === selCat || pType.includes(selCat) || selCat.includes(pType);
-              }).length;
+            {CATEGORIES.slice(1).map(cat => {
+              const count = products.filter(p => matchProductToCategory(p, cat)).length;
               return (
                 <li 
                   key={cat}

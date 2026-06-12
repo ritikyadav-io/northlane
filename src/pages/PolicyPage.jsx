@@ -64,8 +64,8 @@ export default function PolicyPage({ type }) {
             <p className="policy-updated">Last Updated: June 11, 2026</p>
 
             <section className="policy-section">
-              <h2 className="policy-sec-title">1. 30-Day Money Back Guarantee</h2>
-              <p>We want you to be absolutely satisfied with your purchase. If you are not happy with your order, you can return it within <strong>30 days</strong> of receiving it for a full refund or replacement. No hassle, no questions asked.</p>
+              <h2 className="policy-sec-title">1. 7-Day Money Back Guarantee</h2>
+              <p>We want you to be absolutely satisfied with your purchase. If you are not happy with your order, you can return it within <strong>7 days</strong> of receiving it for a full refund or replacement. No hassle, no questions asked.</p>
               <p>To be eligible for a return, your item must be in the same condition that you received it, unworn or unused, with tags, and in its original packaging. You’ll also need the receipt or proof of purchase.</p>
             </section>
 
@@ -94,10 +94,9 @@ export default function PolicyPage({ type }) {
 
             <section className="policy-section">
               <h2 className="policy-sec-title">1. Shipping Coverage & Pricing</h2>
-              <p>We proudly offer tracked shipping to the <strong>United States</strong> and <strong>United Kingdom</strong>. We believe in honest pricing, which is why we offer low shipping thresholds:</p>
+              <p>We proudly offer tracked shipping to the <strong>United States</strong>. We believe in honest pricing, which is why we offer low shipping thresholds:</p>
               <ul className="policy-list">
                 <li><strong>United States</strong>: Free Standard Shipping on all orders over <strong>$15.00</strong>. Orders under $15.00 are charged a flat shipping rate of $3.99.</li>
-                <li><strong>United Kingdom</strong>: Free Standard Shipping on all orders over <strong>$20.00</strong>. Orders under $20.00 are charged a flat shipping rate of $4.99.</li>
               </ul>
             </section>
 
@@ -108,8 +107,7 @@ export default function PolicyPage({ type }) {
                 <li><strong>Processing Time</strong>: 1 to 3 business days. This includes order verification, product inspection, quality checking, and packaging.</li>
                 <li><strong>Shipping Times</strong>:
                   <ul style={{ paddingLeft: '20px', marginTop: '6px' }}>
-                    <li><strong>US Delivery</strong>: 7 to 15 business days (fully tracked).</li>
-                    <li><strong>UK Delivery</strong>: 10 to 18 business days (fully tracked).</li>
+                    <li><strong>US Delivery</strong>: 5 to 12 business days (fully tracked).</li>
                   </ul>
                 </li>
               </ul>
@@ -117,7 +115,7 @@ export default function PolicyPage({ type }) {
 
             <section className="policy-section">
               <h2 className="policy-sec-title">3. Live Tracking Information</h2>
-              <p>Once your order is shipped, you will automatically receive an email confirmation containing a unique tracking link and number. You can monitor your package status via standard postal tracking websites (such as USPS, Royal Mail, or global platforms like 17track.net).</p>
+              <p>Once your order is shipped, you will automatically receive an email confirmation containing a unique tracking link and number. You can monitor your package status via standard postal tracking websites (such as USPS or global platforms like 17track.net).</p>
             </section>
           </>
         );
@@ -148,7 +146,7 @@ export default function PolicyPage({ type }) {
 
             <section className="policy-section">
               <h2 className="policy-sec-title">4. Governing Law</h2>
-              <p>These Terms of Service and any separate agreements whereby we provide you Services shall be governed by and construed in accordance with the laws of the United States and the United Kingdom.</p>
+              <p>These Terms of Service and any separate agreements whereby we provide you Services shall be governed by and construed in accordance with the laws of the United States.</p>
             </section>
           </>
         );
@@ -203,8 +201,8 @@ export default function PolicyPage({ type }) {
                 <div className="contact-detail-card">
                   <span className="contact-card-icon">📍</span>
                   <div>
-                    <h3 className="contact-card-title">Fulfillment Centers</h3>
-                    <p className="contact-card-text">Atlanta, Georgia, USA | London, UK</p>
+                    <h3 className="contact-card-title">Fulfillment Center</h3>
+                    <p className="contact-card-text">Atlanta, Georgia, USA</p>
                   </div>
                 </div>
               </div>

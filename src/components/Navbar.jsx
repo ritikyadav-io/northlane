@@ -182,7 +182,7 @@ export default function Navbar() {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Search creams, serums, nails, lingerie..."
+                  placeholder="Search lingerie, face tools, brushes, makeup kits..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   style={{

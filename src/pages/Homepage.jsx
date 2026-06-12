@@ -6,8 +6,7 @@ import { fetchProducts } from '../shopify';
 const CATEGORIES = [
   'All',
   'Lingerie & Nightwear',
-  'Skincare & Creams',
-  'Cosmetics & Nails',
+  'Beauty Tools & Accessories',
   'Wellness & Self-Care',
   'Fashion & Shoes'
 ];
@@ -26,6 +25,9 @@ const renderStars = (rating) => {
 export default function Homepage() {
   const { navigate } = useRouter();
   const { addToCart } = useCart();
+  
+  const categoryScrollRef = React.useRef(null);
+  const shopCategoryScrollRef = React.useRef(null);
   
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -71,6 +73,21 @@ export default function Homepage() {
     loadProducts();
   }, []);
 
+  useEffect(() => {
+    if (categoryScrollRef.current) {
+      const activeEl = categoryScrollRef.current.querySelector('.category-pill.active');
+      if (activeEl) {
+        activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }
+    if (shopCategoryScrollRef.current) {
+      const activeEl = shopCategoryScrollRef.current.querySelector('.category-pill.active');
+      if (activeEl) {
+        activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }
+  }, [activeCategory]);
+
   // Filter products by category, search query, sale status, and price
   const getFilteredProducts = (category) => {
     let result = [...products];
@@ -89,32 +106,54 @@ export default function Homepage() {
         
         // Lingerie & Nightwear
         if (cat.includes('lingerie') || cat.includes('nightwear')) {
-          const keywords = ['lace', 'lingerie', 'bra', 'babydoll', 'teddy', 'thong', 'panties', 'womens fashion'];
-          return pType.includes('fashion') || keywords.some(k => handle.includes(k) || title.includes(k));
+          const keywords = ['lingerie', 'bra', 'babydoll', 'teddy', 'thong', 'panties', 'chemise', 'nightwear'];
+          return keywords.some(k => handle.includes(k) || title.includes(k));
         }
         
-        // Skincare & Creams
-        if (cat.includes('skin') || cat.includes('cream') || cat.includes('serum')) {
-          const keywords = ['cream', 'serum', 'skin', 'lotion', 'moisturizer', 'gel', 'face', 'cleanser'];
-          return pType.includes('cosmetics') || pType.includes('beauty') || keywords.some(k => handle.includes(k) || title.includes(k));
-        }
-        
-        // Cosmetics & Nails
-        if (cat.includes('cosmetics') || cat.includes('nail') || cat.includes('makeup') || cat.includes('eye')) {
-          const keywords = ['eye', 'nail', 'makeup', 'eyeliner', 'lipstick', 'mascara', 'polish', 'brush'];
-          return pType.includes('cosmetics') || pType.includes('beauty') || keywords.some(k => handle.includes(k) || title.includes(k));
+        // Beauty Tools & Accessories
+        if (cat.includes('beauty') || cat.includes('tool') || cat.includes('accessories')) {
+          const keywords = [
+            'brush-cleaner', 'makeup', 'massager', 'hair-identifier', 
+            'mascara', 'hair-removal', 'depilatory', 'ear-wax', 
+            'eyelash', 'skincare', 'cosmetics', 'brush', 'slimming'
+          ];
+          // Exclude lingerie
+          const isLingerie = ['lingerie', 'bra', 'babydoll', 'teddy', 'thong', 'panties', 'chemise', 'nightwear']
+            .some(k => handle.includes(k) || title.includes(k));
+          if (isLingerie) return false;
+
+          return pType.includes('beauty') || pType.includes('makeup') || pType.includes('cosmetics') || keywords.some(k => handle.includes(k) || title.includes(k));
         }
         
         // Wellness & Self-Care
         if (cat.includes('wellness') || cat.includes('care')) {
-          const keywords = ['posture', 'massager', 'fitness', 'spine', 'belt', 'orthosis', 'health', 'relax', 'massage'];
-          return pType.includes('wellness') || pType.includes('lifestyle') || keywords.some(k => handle.includes(k) || title.includes(k));
+          const keywords = [
+            'tumbler', 'pilates', 'headband', 'fitness', 'bracelet', 
+            'massager', 'ear-wax', 'posture', 'spine', 'belt', 
+            'orthosis', 'health', 'relax', 'massage'
+          ];
+          // Exclude lingerie
+          const isLingerie = ['lingerie', 'bra', 'babydoll', 'teddy', 'thong', 'panties', 'chemise', 'nightwear']
+            .some(k => handle.includes(k) || title.includes(k));
+          if (isLingerie) return false;
+
+          // Exclude fashion/shoes/heels
+          const isFashionOrHeels = ['heels', 'shoes', 'jumpsuit', 'dress']
+            .some(k => handle.includes(k) || title.includes(k));
+          if (isFashionOrHeels) return false;
+
+          return pType.includes('wellness') || pType.includes('fitness') || pType.includes('lifestyle') || keywords.some(k => handle.includes(k) || title.includes(k));
         }
         
         // Fashion & Shoes
         if (cat.includes('shoes') || cat.includes('fashion') || cat.includes('heel')) {
-          const keywords = ['heels', 'shoes', 'bag', 'accessories', 'headband', 'jewelry', 'outfit', 'dress'];
-          return pType.includes('lifestyle') || pType.includes('fashion') || keywords.some(k => handle.includes(k) || title.includes(k));
+          const keywords = ['heels', 'shoes', 'jumpsuit', 'bag', 'accessories', 'headband', 'jewelry', 'outfit', 'dress', 'doll', 'couple doll', 'decor'];
+          // Exclude lingerie
+          const isLingerie = ['lingerie', 'bra', 'babydoll', 'teddy', 'thong', 'panties', 'chemise', 'nightwear']
+            .some(k => handle.includes(k) || title.includes(k));
+          if (isLingerie) return false;
+
+          return pType.includes('fashion') || pType.includes('shoes') || pType.includes('lifestyle') || pType.includes('decor') || keywords.some(k => handle.includes(k) || title.includes(k));
         }
         
         return pType.includes(cat) || cat.includes(pType);
@@ -287,38 +326,73 @@ export default function Homepage() {
     return {
       tag: 'Featured Selection',
       headline: `Premium ${product.title}`,
-      subheadline: product.description ? product.description.split('.').slice(0, 2).join('.') + '.' : 'Carefully selected and reviewed for premium US & UK quality.',
+      subheadline: product.description ? product.description.split('.').slice(0, 2).join('.') + '.' : 'Carefully selected and reviewed for premium US quality.',
       soldText: 'High demand product'
     };
   };
 
-  // 1. Daily Best Sellers Rotation
+  // 1. 5-Day Best Sellers Rotation (Always show beauty tools)
   const getDailyBestSellers = () => {
     if (products.length === 0) return [];
+    
+    // Filter for beauty tools
+    const beautyTools = products.filter(p => {
+      if (!p.productType) return false;
+      const pType = p.productType.toLowerCase();
+      const handle = p.handle.toLowerCase();
+      const title = p.title.toLowerCase();
+      
+      const keywords = [
+        'brush-cleaner', 'makeup', 'massager', 'hair-identifier', 
+        'mascara', 'hair-removal', 'depilatory', 'ear-wax', 
+        'eyelash', 'skincare', 'cosmetics', 'brush', 'slimming'
+      ];
+      // Exclude lingerie
+      const isLingerie = ['lingerie', 'bra', 'babydoll', 'teddy', 'thong', 'panties', 'chemise', 'nightwear']
+        .some(k => handle.includes(k) || title.includes(k));
+      if (isLingerie) return false;
+      
+      return pType.includes('beauty') || pType.includes('makeup') || pType.includes('cosmetics') || keywords.some(k => handle.includes(k) || title.includes(k));
+    });
+
+    if (beautyTools.length === 0) return [];
+
     const daysSinceEpoch = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
-    const offset = daysSinceEpoch % products.length;
-    const shifted = [...products.slice(offset), ...products.slice(0, offset)];
+    const offset = Math.floor(daysSinceEpoch / 5) % beautyTools.length;
+    const shifted = [...beautyTools.slice(offset), ...beautyTools.slice(0, offset)];
     return shifted.slice(0, 4);
   };
   const bestSellers = getDailyBestSellers();
 
-  // 2. 5-Day Featured Product Rotation (> $20)
+  // 2. 3-Day Featured Product Rotation (> $20)
   const getFeaturedProduct = () => {
     const eligible = products.filter(p => p.minPrice > 20);
     if (eligible.length === 0) return products[0];
     const daysSinceEpoch = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
-    const index = Math.floor(daysSinceEpoch / 5) % eligible.length;
+    const index = Math.floor(daysSinceEpoch / 3) % eligible.length;
     return eligible[index];
   };
   const featuredProduct = getFeaturedProduct();
   const featuredCopy = getFeaturedCopy(featuredProduct);
 
-  // Products for featured collection (Home Decor and Outdoor)
-  const featuredCollectionProducts = products.filter(p => 
-    p.handle.includes('octopus') || 
-    p.handle.includes('water-ripple') || 
-    p.handle.includes('camping-light')
-  ).slice(0, 4);
+  // 3. 3-Day Featured Collection Rotation (Home Decor, Dining, Lifestyle)
+  const getFeaturedCollectionProducts = () => {
+    const eligible = products.filter(p => 
+      p.handle.includes('octopus') || 
+      p.handle.includes('water-ripple') || 
+      p.handle.includes('camping-light') ||
+      p.productType.toLowerCase().includes('decor') ||
+      p.productType.toLowerCase().includes('dining') ||
+      p.productType.toLowerCase().includes('lifestyle')
+    );
+    if (eligible.length === 0) return [];
+    
+    const daysSinceEpoch = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+    const offset = Math.floor(daysSinceEpoch / 3) % eligible.length;
+    const shifted = [...eligible.slice(offset), ...eligible.slice(0, offset)];
+    return shifted.slice(0, 4);
+  };
+  const featuredCollectionProducts = getFeaturedCollectionProducts();
 
   // Fallback if we don't have exactly 4 images for the 2x2 grid
   const promoImages = [];
@@ -330,11 +404,35 @@ export default function Homepage() {
   }
 
   // Parse bullet points from featured product features
-  const featuredBullets = featuredProduct ? featuredProduct.features.slice(0, 4) : [
-    'Premium quality materials',
-    'Designed for durability and style',
-    'US & UK shipping friendly'
+  const featuredBullets = featuredProduct ? featuredProduct.features.slice(0, 3) : [
+    'Premium Curated Design',
+    'Everyday Functionality',
+    'US Tracked Delivery'
   ];
+
+  if (error) {
+    return (
+      <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px', padding: '40px 24px', textAlign: 'center' }}>
+        <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'var(--color-bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--color-border)' }}>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <div style={{ maxWidth: '400px' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--color-primary)', marginBottom: '8px' }}>Storefront Connection Error</h2>
+          <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)', lineHeight: '1.5' }}>
+            We're unable to connect to the Shopify storefront at the moment. Please verify your internet connection or try again later.
+          </p>
+          <p style={{ fontSize: '0.8rem', color: 'var(--color-accent)', marginTop: '8px', fontFamily: 'monospace' }}>Error: {error}</p>
+        </div>
+        <button onClick={() => window.location.reload()} className="btn btn-primary" style={{ padding: '10px 24px' }}>
+          Retry Connection
+        </button>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -378,7 +476,7 @@ export default function Homepage() {
                   <circle cx="18.5" cy="18.5" r="2.5"></circle>
                 </svg>
               </span>
-              <span>Free US and UK Shipping</span>
+              <span>Free US Shipping</span>
             </div>
             <div className="trust-item">
               <span className="trust-icon">
@@ -386,7 +484,7 @@ export default function Homepage() {
                   <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
                 </svg>
               </span>
-              <span>30-Day Returns</span>
+              <span>7-Day Returns</span>
             </div>
             <div className="trust-item">
               <span className="trust-icon">
@@ -404,7 +502,7 @@ export default function Homepage() {
       {/* SECTION 2: CATEGORY BAR */}
       <div className="category-bar">
         <div className="container">
-          <div className="category-scroll">
+          <div className="category-scroll" ref={categoryScrollRef}>
             {CATEGORIES.map(cat => (
               <button
                 key={cat}
@@ -427,7 +525,7 @@ export default function Homepage() {
         <div className="container">
           <div className="section-title-wrapper">
             <h2 className="section-title">Best Sellers</h2>
-            <p className="section-subtitle">Our most loved products, chosen by customers across the US and UK</p>
+            <p className="section-subtitle">Our most loved products, chosen by customers across the United States</p>
           </div>
           
           <div className="product-grid" style={{ overflowX: 'auto', display: 'grid', gridAutoFlow: 'column', gridTemplateColumns: 'none', gap: '20px', paddingBottom: '16px' }} className="product-grid-best-sellers">
@@ -534,43 +632,27 @@ export default function Homepage() {
         <div className="container">
           <div className="section-title-wrapper" style={{ marginBottom: '30px' }}>
             <h2 className="section-title">Shop All Products</h2>
-            <p className="section-subtitle">Free shipping on US orders over $15 and UK orders over $20</p>
+            <p className="section-subtitle">Free shipping on all US orders over $15</p>
           </div>
 
-          {/* Grid control bar */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '16px', borderBottom: '1px solid var(--color-border)', paddingBottom: '16px' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '16px', borderBottom: '1px solid var(--color-border)', paddingBottom: '16px' }} className="shop-grid-control-bar">
             {/* Inline filters */}
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-              {CATEGORIES.slice(0, 4).map(cat => (
+            <div className="category-scroll" ref={shopCategoryScrollRef} style={{ flex: '1', minWidth: '280px' }}>
+              {CATEGORIES.map(cat => (
                 <button
                   key={cat}
-                  style={{
-                    padding: '6px 12px',
-                    fontSize: '0.8rem',
-                    borderRadius: '4px',
-                    border: '1px solid var(--color-border)',
-                    backgroundColor: activeCategory === cat ? 'var(--color-primary)' : 'var(--color-bg)',
-                    color: activeCategory === cat ? '#fff' : 'var(--color-text)',
-                    fontWeight: '600',
-                    cursor: 'pointer'
+                  className={`category-pill ${activeCategory === cat ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveCategory(cat);
+                    setSearchQuery('');
+                    setMinPrice('');
+                    setMaxPrice('');
+                    setOnSaleOnly(false);
                   }}
-                  onClick={() => { setActiveCategory(cat); setSearchQuery(''); setMinPrice(''); setMaxPrice(''); setOnSaleOnly(false); }}
                 >
                   {cat}
                 </button>
               ))}
-              {activeCategory !== 'All' && !CATEGORIES.slice(0, 4).includes(activeCategory) && (
-                <span style={{
-                  padding: '6px 12px',
-                  fontSize: '0.8rem',
-                  borderRadius: '4px',
-                  backgroundColor: 'var(--color-primary)',
-                  color: '#fff',
-                  fontWeight: '600'
-                }}>
-                  {activeCategory}
-                </span>
-              )}
             </div>
 
             {/* Right Side: Filters toggle & Sort Dropdown */}
@@ -954,7 +1036,7 @@ export default function Homepage() {
                 </svg>
               </span>
               <h3 className="why-card-title">Fast & Discreet Shipping</h3>
-              <p className="why-card-text">Delivered in 7 to 15 business days to the US & UK in secure, unbranded, discreet packaging.</p>
+              <p className="why-card-text">Delivered in 7 to 15 business days to the US in secure, unbranded, discreet packaging.</p>
             </div>
 
             <div className="why-card">
@@ -964,7 +1046,7 @@ export default function Homepage() {
                 </svg>
               </span>
               <h3 className="why-card-title">Hassle-Free Returns</h3>
-              <p className="why-card-text">Not fully satisfied? Return any unused beauty or lingerie product within 30 days.</p>
+              <p className="why-card-text">Not fully satisfied? Return any unused beauty or lingerie product within 7 days.</p>
             </div>
 
             <div className="why-card">
@@ -1019,7 +1101,7 @@ export default function Homepage() {
         <div className="container">
           <div className="section-title-wrapper">
             <h2 className="section-title">What Our Customers Are Saying</h2>
-            <p className="section-subtitle">Real reviews from real customers across the US and UK</p>
+            <p className="section-subtitle">Real reviews from real customers across the United States</p>
           </div>
           
           <div className="reviews-grid">
@@ -1051,7 +1133,7 @@ export default function Homepage() {
             <div className="review-card">
               <div className="review-card-header">
                 <span className="reviewer-name">Ashley P.</span>
-                <span className="reviewer-loc">London, UK</span>
+                <span className="reviewer-loc">Boston, USA</span>
               </div>
               <div className="star-rating">
                 {Array(5).fill().map((_, i) => (
@@ -1145,7 +1227,7 @@ export default function Homepage() {
                     key={i} 
                     src={url} 
                     alt="Collection product" 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', borderRadius: '4px' }} 
                   />
                 ))}
               </div>
@@ -1212,11 +1294,11 @@ export default function Homepage() {
             {[
               {
                 q: 'Where do you ship?',
-                a: 'We ship to the United States and United Kingdom. Free shipping on US orders over $15 and UK orders over $20.'
+                a: 'We ship across the United States. Free shipping is available on all US orders over $15.'
               },
               {
                 q: 'How long does delivery take?',
-                a: 'US orders take 7 to 15 business days. UK orders take 10 to 18 business days after processing.'
+                a: 'Orders are processed in 1 to 3 business days, and standard delivery takes 7 to 15 business days.'
               },
               {
                 q: 'Can I return my order?',

@@ -36,10 +36,10 @@ function generateReviews(handle, title) {
   ];
   const lastInitials = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const locations = [
-    'New York, USA', 'London, UK', 'Los Angeles, USA', 'Chicago, USA',
-    'Manchester, UK', 'Houston, USA', 'Birmingham, UK', 'Phoenix, USA',
-    'Edinburgh, UK', 'Dallas, USA', 'Liverpool, UK', 'Seattle, USA',
-    'Bristol, UK', 'Denver, USA', 'Leeds, UK', 'San Francisco, USA'
+    'New York, USA', 'Boston, USA', 'Los Angeles, USA', 'Chicago, USA',
+    'Austin, USA', 'Houston, USA', 'Miami, USA', 'Phoenix, USA',
+    'Portland, USA', 'Dallas, USA', 'Atlanta, USA', 'Seattle, USA',
+    'Philadelphia, USA', 'Denver, USA', 'San Diego, USA', 'San Francisco, USA'
   ];
 
   const reviewTemplates = [
@@ -64,20 +64,27 @@ function generateReviews(handle, title) {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   const reviews = [];
+  const today = new Date();
   for (let i = 0; i < count; i++) {
     const template = reviewTemplates[Math.floor(rng() * reviewTemplates.length)];
     const firstName = firstNames[Math.floor(rng() * firstNames.length)];
     const lastInit = lastInitials[Math.floor(rng() * lastInitials.length)];
     const location = locations[Math.floor(rng() * locations.length)];
     const rating = rng() > 0.15 ? 5 : 4;
-    const month = months[Math.floor(rng() * 6) + 3]; // Mar–Aug 2026
-    const day = Math.floor(rng() * 28) + 1;
+    
+    // Generate a past date between 2 and 120 days ago
+    const daysAgo = 2 + Math.floor(rng() * 118);
+    const reviewDate = new Date(today.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+    const month = months[reviewDate.getMonth()];
+    const day = reviewDate.getDate();
+    const year = reviewDate.getFullYear();
+    const formattedDate = `${month} ${day}, ${year}`;
     const helpful = Math.floor(rng() * 20);
 
     reviews.push({
       author: `${firstName} ${lastInit}.`,
       location,
-      date: `${month} ${day}, 2026`,
+      date: formattedDate,
       rating,
       title: template.title,
       text: template.text,
@@ -98,28 +105,101 @@ export default function ProductPage({ handle }) {
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeImage, setActiveImage] = useState('');
   const [selectedVariant, setSelectedVariant] = useState(null);
+  const [selectedOptionsState, setSelectedOptionsState] = useState({});
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('Description');
   const [shareCopied, setShareCopied] = useState(false);
   const [buyNowLoading, setBuyNowLoading] = useState(false);
   const [reviewsState, setReviewsState] = useState([]);
 
+  // Parse description function for unstructured/structured dropship detail lines
+  const parseDescription = (desc) => {
+    if (!desc) return { type: 'paragraphs', items: [] };
+
+    const labels = [
+      'Applicable people', 'Applicable skin type', 'Category', 'Specification', 'Main Ingredients', 'Packing list', 'Product Image',
+      'Product information', 'Main ingredients', 'Net content', 'Shelf life', 'Skin Type', 'Scope of application', 'Features'
+    ];
+
+    let hasLabelsCount = 0;
+    labels.forEach(lbl => {
+      if (desc.includes(lbl + ':') || desc.includes(lbl + '：')) {
+        hasLabelsCount++;
+      }
+    });
+
+    if (hasLabelsCount >= 2) {
+      const regexStr = '(' + labels.map(l => l.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')).join('|') + ')[:：]';
+      const regex = new RegExp(regexStr, 'gi');
+
+      const parts = desc.split(regex);
+      const items = [];
+      for (let i = 1; i < parts.length; i += 2) {
+        const key = parts[i]?.trim();
+        const val = parts[i+1]?.trim().replace(/[.,;]+$/, '');
+        if (key && val) {
+          items.push({ key, val });
+        }
+      }
+      if (items.length > 0) {
+        return { type: 'structured', items };
+      }
+    }
+
+    const lines = desc
+      .split(/[.!?\n]+/)
+      .map(line => line.trim())
+      .filter(line => line.length > 5);
+
+    return { type: 'paragraphs', items: lines };
+  };
+
+  const parsedDesc = product ? parseDescription(product.description || '') : { type: 'paragraphs', items: [] };
+
+  const optionsMap = {};
+  if (product && product.variants) {
+    product.variants.forEach(v => {
+      if (v.selectedOptions) {
+        v.selectedOptions.forEach(opt => {
+          if (!optionsMap[opt.name]) {
+            optionsMap[opt.name] = new Set();
+          }
+          optionsMap[opt.name].add(opt.value);
+        });
+      }
+    });
+    Object.keys(optionsMap).forEach(key => {
+      optionsMap[key] = Array.from(optionsMap[key]);
+    });
+  }
+
   useEffect(() => {
     async function loadProductData() {
       try {
         setLoading(true);
+        setError(null);
         const fetchedProduct = await fetchProductByHandle(handle);
         if (!fetchedProduct) {
-          throw new Error('Product not found');
+          throw new Error('Product not found or connection error');
         }
         setProduct(fetchedProduct);
         setActiveImage(fetchedProduct.images[0] || '');
         
-        // Select first variant by default
+        // Select first variant by default and set up option states
         if (fetchedProduct.variants && fetchedProduct.variants.length > 0) {
-          setSelectedVariant(fetchedProduct.variants[0]);
+          const firstVariant = fetchedProduct.variants[0];
+          setSelectedVariant(firstVariant);
+          const initialOptions = {};
+          firstVariant.selectedOptions.forEach(opt => {
+            initialOptions[opt.name] = opt.value;
+          });
+          setSelectedOptionsState(initialOptions);
+        } else {
+          setSelectedVariant(null);
+          setSelectedOptionsState({});
         }
 
         // Fetch related products (same product type)
@@ -144,7 +224,7 @@ export default function ProductPage({ handle }) {
         setActiveTab('Description');
       } catch (err) {
         console.error('Failed to load product page:', err);
-        navigate('/');
+        setError(err.message || 'Product not found');
       } finally {
         setLoading(false);
       }
@@ -155,11 +235,21 @@ export default function ProductPage({ handle }) {
     }
   }, [handle]);
 
-  // Handle variant selection
-  const handleVariantSelect = (variant) => {
-    setSelectedVariant(variant);
-    if (variant.image) {
-      setActiveImage(variant.image);
+  // Handle option/variant changes dynamically
+  const handleOptionChange = (optionName, value) => {
+    const newOptions = { ...selectedOptionsState, [optionName]: value };
+    setSelectedOptionsState(newOptions);
+    
+    // Find variant that matches all these options
+    const matchingVariant = product.variants.find(v => {
+      return v.selectedOptions.every(opt => newOptions[opt.name] === opt.value);
+    });
+    
+    if (matchingVariant) {
+      setSelectedVariant(matchingVariant);
+      if (matchingVariant.image) {
+        setActiveImage(matchingVariant.image);
+      }
     }
   };
 
@@ -208,6 +298,35 @@ export default function ProductPage({ handle }) {
     maxDate.setDate(today.getDate() + 15);
     return `${minDate.toLocaleDateString('en-US', options)} - ${maxDate.toLocaleDateString('en-US', options)}`;
   };
+
+  if (error) {
+    return (
+      <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px', padding: '40px 24px', textAlign: 'center' }}>
+        <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'var(--color-bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--color-border)' }}>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <div style={{ maxWidth: '400px' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--color-primary)', marginBottom: '8px' }}>Unable to Load Product</h2>
+          <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)', lineHeight: '1.5' }}>
+            We encountered an issue fetching this product. Please check your network connection or try again.
+          </p>
+          {error && <p style={{ fontSize: '0.8rem', color: 'var(--color-accent)', marginTop: '8px', fontFamily: 'monospace' }}>Error: {error}</p>}
+        </div>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button onClick={() => window.location.reload()} className="btn btn-primary" style={{ padding: '10px 24px' }}>
+            Retry Connection
+          </button>
+          <Link to="/collections/all" className="btn btn-outline" style={{ padding: '10px 24px' }}>
+            Browse Catalog
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (loading || !product) {
     return (
@@ -320,26 +439,70 @@ export default function ProductPage({ handle }) {
 
           {/* Short description */}
           <p className="product-info-short-desc">
-            {product.description 
-              ? product.description.split('.').slice(0, 2).join('.') + '.'
-              : 'A premium product curated with the highest standards of materials and craftsmanship.'}
+            {parsedDesc.type === 'structured'
+              ? `Premium ${product.productType || 'boutique selection'} crafted for high-performance self-care. ${
+                  parsedDesc.items.find(i => i.key.toLowerCase().includes('ingredients'))
+                    ? `Formulated with premium active components like ${parsedDesc.items.find(i => i.key.toLowerCase().includes('ingredients')).val}.`
+                    : 'Curated with premium quality standards for our US customers.'
+                }`
+              : (product.description 
+                  ? product.description.split(/[.!?\n]/).slice(0, 2).join('. ').trim() + '.'
+                  : 'A premium product curated with the highest standards of materials and craftsmanship.')}
           </p>
 
+          {/* Product Tags */}
+          {product.tags && product.tags.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', margin: '14px 0 20px 0' }}>
+              {product.tags.filter(t => t.toLowerCase() !== 'usa').map((tag, idx) => (
+                <span 
+                  key={idx} 
+                  style={{
+                    backgroundColor: 'var(--color-bg-secondary)',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: '4px',
+                    padding: '4px 10px',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    color: 'var(--color-text-muted)',
+                    textTransform: 'capitalize',
+                    letterSpacing: '0.2px'
+                  }}
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
           {/* Variant Selector */}
-          {product.variants.length > 1 && (
-            <div className="variant-selector-box">
-              <h3 className="variant-label">Select Color/Style:</h3>
-              <div className="variant-options">
-                {product.variants.map((v) => (
-                  <button
-                    key={v.id}
-                    className={`variant-pill-btn ${selectedVariant?.id === v.id ? 'active' : ''}`}
-                    onClick={() => handleVariantSelect(v)}
-                  >
-                    {v.title.split(' / ')[0]} {/* Show color only */}
-                  </button>
-                ))}
-              </div>
+          {product.variants.length > 1 && Object.keys(optionsMap).length > 0 && (
+            <div className="variant-selectors-container" style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '24px' }}>
+              {Object.entries(optionsMap).map(([optionName, optionValues]) => {
+                if (optionName.toLowerCase() === 'title' && optionValues.length === 1 && optionValues[0] === 'Default Title') {
+                  return null;
+                }
+                return (
+                  <div key={optionName} className="variant-selector-box">
+                    <h3 className="variant-label" style={{ fontSize: '0.9rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px', color: 'var(--color-primary)' }}>
+                      Select {optionName}: <span style={{ fontWeight: '500', color: 'var(--color-text-muted)', textTransform: 'none' }}>{selectedOptionsState[optionName]}</span>
+                    </h3>
+                    <div className="variant-options" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      {optionValues.map((value) => {
+                        const isActive = selectedOptionsState[optionName] === value;
+                        return (
+                          <button
+                            key={value}
+                            className={`variant-pill-btn ${isActive ? 'active' : ''}`}
+                            onClick={() => handleOptionChange(optionName, value)}
+                          >
+                            {value}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
 
@@ -484,18 +647,25 @@ export default function ProductPage({ handle }) {
         <div className="tab-content">
           {activeTab === 'Description' && (
             <div style={{ fontFamily: 'var(--font-sans)', color: 'var(--color-text)', fontSize: '0.95rem', lineHeight: '1.6' }}>
-              <ul style={{ listStyleType: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                {(product.description || '')
-                  .split(/[.!?\n]+/)
-                  .map(line => line.trim())
-                  .filter(line => line.length > 5)
-                  .map((line, idx) => (
+              {parsedDesc.type === 'structured' ? (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+                  {parsedDesc.items.map((item, idx) => (
+                    <div key={idx} style={{ padding: '14px 16px', backgroundColor: 'var(--color-bg-secondary)', borderRadius: '6px', border: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <span style={{ color: 'var(--color-accent)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.key}</span>
+                      <span style={{ fontSize: '0.95rem', color: 'var(--color-primary)', fontWeight: '600' }}>{item.val}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <ul style={{ listStyleType: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {parsedDesc.items.map((line, idx) => (
                     <li key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                       <span style={{ color: 'var(--color-accent)', fontWeight: 'bold', fontSize: '1.1rem', marginTop: '-2px', userSelect: 'none' }}>✓</span>
                       <span style={{ lineHeight: '1.5' }}>{line}.</span>
                     </li>
                   ))}
-              </ul>
+                </ul>
+              )}
             </div>
           )}
 

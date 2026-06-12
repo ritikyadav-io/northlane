@@ -20,7 +20,7 @@ export default function Footer() {
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '30px', marginBottom: '40px', gap: '20px' }}>
           <span style={{ fontSize: '1.75rem', fontWeight: '800', letterSpacing: '-0.5px', color: 'var(--color-bg)' }}>NORTHLANE</span>
           <p style={{ fontSize: '0.95rem', color: '#CBD5E1', maxWidth: '500px', margin: '0' }}>
-            Premium everyday products for modern living, delivered to the US and UK.
+            Premium everyday products for modern living, delivered across the United States.
           </p>
         </div>
 
@@ -34,8 +34,7 @@ export default function Footer() {
               <li><Link to="/collections/all" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">All Products</Link></li>
               <li><a href="#best-sellers" onClick={(e) => { e.preventDefault(); handleScrollToSection('best-sellers'); }} style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Best Sellers</a></li>
               <li><Link to="/collections/lingerie-nightwear" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Lingerie & Nightwear</Link></li>
-              <li><Link to="/collections/skincare-creams" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Skincare & Creams</Link></li>
-              <li><Link to="/collections/cosmetics-nails" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Cosmetics & Nails</Link></li>
+              <li><Link to="/collections/beauty-tools-accessories" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Beauty Tools & Accessories</Link></li>
               <li><Link to="/collections/wellness-selfcare" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Wellness & Self-Care</Link></li>
               <li><Link to="/collections/fashion-shoes" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Fashion & Shoes</Link></li>
             </ul>

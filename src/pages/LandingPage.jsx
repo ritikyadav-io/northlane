@@ -203,7 +203,7 @@ export default function LandingPage() {
             <span>4.8 Star Average Rating</span>
           </div>
           <div className="landing-social-item">
-            <span>Free US and UK Shipping</span>
+            <span>Free US Shipping</span>
           </div>
         </div>
       </section>
@@ -424,7 +424,7 @@ export default function LandingPage() {
             <div className="review-card">
               <div className="review-card-header">
                 <span className="reviewer-name">James L.</span>
-                <span className="reviewer-loc">London, UK</span>
+                <span className="reviewer-loc">Los Angeles, USA</span>
               </div>
               <div className="star-rating">★★★★★</div>
               <p className="review-text">
@@ -448,11 +448,11 @@ export default function LandingPage() {
             <div className="review-card">
               <div className="review-card-header">
                 <span className="reviewer-name">Robert T.</span>
-                <span className="reviewer-loc">Edinburgh, UK</span>
+                <span className="reviewer-loc">Boston, USA</span>
               </div>
               <div className="star-rating">★★★★★</div>
               <p className="review-text">
-                Delivered in just 10 days to Scotland. The lid lock is secure and it is very easy to clean. Perfect for long road trips.
+                Delivered in just 5 days. The lid lock is secure and it is very easy to clean. Perfect for long road trips.
               </p>
               <span className="verified-badge">Verified Buyer</span>
             </div>
@@ -482,8 +482,8 @@ export default function LandingPage() {
                 a: 'No. The lid features an advanced silicone gasket seal and a locking straw closure that prevents spills and splashes, making it safe to carry.'
               },
               {
-                q: 'What is the shipping time to the UK and US?',
-                a: 'Standard tracked shipping is 7 to 15 business days to the United States and 10 to 18 business days to the United Kingdom.'
+                q: 'What is the shipping time to the United States?',
+                a: 'Standard tracked shipping is 5 to 12 business days to the United States.'
               }
             ].map((item, idx) => {
               const isOpen = openFaqIdx === idx;

@@ -21,13 +21,10 @@ export default function CartDrawer() {
 
   // Free shipping logic
   const usThreshold = 15;
-  const ukThreshold = 20;
   
   const usDiff = usThreshold - subtotal;
-  const ukDiff = ukThreshold - subtotal;
 
   const usPercent = Math.min((subtotal / usThreshold) * 100, 100);
-  const ukPercent = Math.min((subtotal / ukThreshold) * 100, 100);
 
   const handleAddUpsell = () => {
     if (upsellProduct) {
@@ -69,7 +66,7 @@ export default function CartDrawer() {
                 <path d="M16 10a4 4 0 0 1-8 0"></path>
               </svg>
               <p style={{ fontWeight: '600', fontSize: '1.1rem', color: 'var(--color-primary)' }}>Your cart is empty</p>
-              <p style={{ fontSize: '0.9rem', maxWidth: '280px' }}>Fill it with premium essentials and get free shipping across the US and UK.</p>
+              <p style={{ fontSize: '0.9rem', maxWidth: '280px' }}>Fill it with premium essentials and get free shipping across the US.</p>
               <button
                 className="btn btn-primary"
                 style={{ marginTop: '12px' }}
@@ -82,7 +79,7 @@ export default function CartDrawer() {
             <>
               {/* Shipping Goals */}
               <div className="shipping-progress-box">
-                <div style={{ marginBottom: '14px' }}>
+                <div style={{ marginBottom: '0px' }}>
                   <p className="shipping-progress-text">
                     {usDiff > 0
                       ? `You are $${usDiff.toFixed(2)} away from Free US Shipping`
@@ -90,16 +87,6 @@ export default function CartDrawer() {
                   </p>
                   <div className="shipping-bar-bg">
                     <div className="shipping-bar-fill" style={{ width: `${usPercent}%` }}></div>
-                  </div>
-                </div>
-                <div>
-                  <p className="shipping-progress-text">
-                    {ukDiff > 0
-                      ? `You are $${ukDiff.toFixed(2)} away from Free UK Shipping`
-                      : 'You qualify for Free UK Shipping'}
-                  </p>
-                  <div className="shipping-bar-bg">
-                    <div className="shipping-bar-fill" style={{ width: `${ukPercent}%` }}></div>
                   </div>
                 </div>
               </div>
@@ -198,7 +185,7 @@ export default function CartDrawer() {
                 onClick={() => setIsCartOpen(false)}
                 style={{ height: '48px' }}
               >
-                View Cart
+                Continue Shopping
               </button>
             </div>
             <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textAlign: 'center', marginTop: '12px' }}>
