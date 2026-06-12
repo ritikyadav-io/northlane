@@ -1230,12 +1230,12 @@ export default function Homepage() {
                 className="split-img-side"
               >
                 {promoImages.slice(0, 4).map((url, i) => (
-                  <img 
-                    key={i} 
-                    src={url} 
-                    alt="Collection product" 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', borderRadius: '4px' }} 
-                  />
+                  <img
+  key={i}
+  src={url}
+  alt="Collection product"
+  style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', borderRadius: '4px' }}
+/>
                 ))}
               </div>
               
