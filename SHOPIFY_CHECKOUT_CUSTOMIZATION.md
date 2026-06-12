@@ -23,18 +23,18 @@ If you want to remove the visible "Northlane" text button from the checkout page
 
 ---
 
-### Option 2: Point the Logo to Your Storefront (`northlaneofficial.shop`)
-If you want to keep the "Northlane" branding but ensure that when users tap it, they land on your storefront (`https://northlaneofficial.shop`) rather than the Shopify online store:
+### Option 2: Point the Logo to Your Storefront (Your Custom Domain)
+If you want to keep the "Northlane" branding but ensure that when users tap it, they land on your storefront (`https://yourdomain.com`) rather than the Shopify online store:
 
 1. **Go to Shopify Admin Settings**:
    * Click **Settings** in the bottom-left corner of the Shopify admin panel.
 2. **Open Domains Settings**:
    * Click on **Domains** in the settings sidebar.
 3. **Set as Primary Domain**:
-   * Connect your custom domain `northlaneofficial.shop` (if not already done).
-   * Click on the domain `northlaneofficial.shop` and select **Set as primary**.
+   * Connect your custom domain `yourdomain.com` (if not already done).
+   * Click on the domain `yourdomain.com` and select **Set as primary**.
 
-*Once `northlaneofficial.shop` is set as your store's primary domain, Shopify will automatically rewrite the checkout logo link to point directly to `https://northlaneofficial.shop/`!*
+*Once your custom domain is set as your store's primary domain, Shopify will automatically rewrite the checkout logo link to point directly to `https://yourdomain.com/`!*
 
 > [!TIP]
 > **Temporary Removal**: If you haven't bought/launched the custom domain yet or want to remove it for now, change your Shopify store's **Primary Domain** back to your default `.myshopify.com` domain (or active staging domain) in the settings. Then, use the dynamic redirection script outlined in [SHOPIFY_REDIRECT_INSTRUCTIONS.md](file:///c:/Users/prime/OneDrive/Desktop/Northlane/SHOPIFY_REDIRECT_INSTRUCTIONS.md) to redirect visitors to whatever active storefront they came from.
