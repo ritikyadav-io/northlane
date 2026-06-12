@@ -1093,11 +1093,11 @@ export default function Homepage() {
             <div className="stat-label">Satisfaction Rate</div>
           </div>
           <div>
-            <div className="stat-number">30-Day</div>
-            <div className="stat-label">Return Policy</div>
+            <div className="stat-number">7-Day</div>
+            <div className="stat-label">7-Day Return Policy</div>
           </div>
           <div>
-            <div className="stat-number">2</div>
+            <div className="stat-number">1</div>
             <div className="stat-label">Countries Supported</div>
           </div>
         </div>
@@ -1210,56 +1210,6 @@ export default function Homepage() {
           </div>
         </div>
       </section>
-
-      {/* SECTION 9: FEATURED COLLECTION BANNER */}
-      {promoImages.length > 0 && (
-        <section className="section section-bg">
-          <div className="container">
-            <div className="split-banner">
-              {/* Left Side: 2x2 grid of real product images */}
-              <div 
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gridTemplateRows: 'repeat(2, 1fr)',
-                  gap: '8px',
-                  padding: '16px',
-                  backgroundColor: 'var(--color-bg-secondary)',
-                  height: '350px'
-                }}
-                className="split-img-side"
-              >
-                {promoImages.slice(0, 4).map((url, i) => (
-                  <img
-  key={i}
-  src={url}
-  alt="Collection product"
-  style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', borderRadius: '4px' }}
-/>
-                ))}
-              </div>
-              
-              {/* Right Side: Heading, description, CTA */}
-              <div className="split-content-side">
-                <span className="split-tag">Modern Living</span>
-                <h2 className="split-title">Transform Your Space</h2>
-                <p className="split-subtitle">
-                  Discover our collection of premium LED lights and home decor products, designed to elevate your home atmosphere.
-                </p>
-                <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                    setActiveCategory('Home Decor');
-                    document.getElementById('shop-all-products').scrollIntoView({ behavior: 'smooth' });
-                  }}
-                >
-                  Shop Collection
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* SECTION 10: NEWSLETTER */}
       <section className="section newsletter-section">
