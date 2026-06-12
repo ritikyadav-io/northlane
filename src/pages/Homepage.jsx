@@ -47,10 +47,20 @@ export default function Homepage() {
   // Filter active products from the Shopify store
   const activeProducts = products.filter(p => p.available);
 
-  // 1. Dynamic best sellers rotation (3 active products, rotates every 3 days)
+  // 1. Get Best Sellers (Filter specifically for Hair Removal Foam Spray, Electric Makeup Brush Cleaner, Hair Removal Identifying Spray)
   const getDTCBestSellers = () => {
-    if (activeProducts.length === 0) {
-      // Fallback mocks if no products are active in the store
+    // Find matching active products in the store
+    const foam = activeProducts.find(p => p.handle.includes('hair-removal-spray') || p.handle.includes('depilatory') || p.title.toLowerCase().includes('foam spray'));
+    const brush = activeProducts.find(p => p.handle.includes('brush-cleaner') || p.title.toLowerCase().includes('brush cleaner'));
+    const id = activeProducts.find(p => p.handle.includes('hair-identifier') || p.handle.includes('identifying-spray') || p.title.toLowerCase().includes('identifying'));
+
+    const list = [];
+    if (foam) list.push(foam);
+    if (brush) list.push(brush);
+    if (id) list.push(id);
+
+    // Fallback mocks only if store is completely empty / initial load
+    if (list.length === 0 && products.length === 0) {
       return [
         {
           id: 'mock-foam-spray',
@@ -88,17 +98,20 @@ export default function Homepage() {
       ];
     }
 
-    const rotationPeriod = 3; // days
-    const daysSinceEpoch = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
-    const rotationIndex = Math.floor(daysSinceEpoch / rotationPeriod);
-    const offset = rotationIndex % activeProducts.length;
-    const shifted = [...activeProducts.slice(offset), ...activeProducts.slice(0, offset)];
-    return shifted.slice(0, 3);
+    return list;
   };
 
-  // 2. Dynamic beauty tools rotation (2 active products, rotates every 3 days)
+  // 2. Get Beauty Tools (Filter specifically for Electric Makeup Brush Cleaner, Mascara)
   const getDTCBeautyTools = () => {
-    if (activeProducts.length === 0) {
+    const brush = activeProducts.find(p => p.handle.includes('brush-cleaner') || p.title.toLowerCase().includes('brush cleaner'));
+    const masc = activeProducts.find(p => p.handle.includes('mascara') || p.title.toLowerCase().includes('mascara'));
+
+    const list = [];
+    if (brush) list.push(brush);
+    if (masc) list.push(masc);
+
+    // Fallback mocks only if store is completely empty / initial load
+    if (list.length === 0 && products.length === 0) {
       return [
         {
           id: 'mock-brush-cleaner',
@@ -125,29 +138,17 @@ export default function Homepage() {
       ];
     }
 
-    const tools = activeProducts.filter(p => {
-      const type = (p.productType || '').toLowerCase();
-      const title = p.title.toLowerCase();
-      const handle = p.handle.toLowerCase();
-      return type.includes('tool') || type.includes('beauty') || type.includes('makeup') || 
-             type.includes('cosmetic') || type.includes('hair') ||
-             ['cleaner', 'mascara', 'brush', 'removal', 'spray', 'clipper', 'shaver', 'trimmer']
-               .some(k => title.includes(k) || handle.includes(k));
-    });
-
-    const listToRotate = tools.length > 0 ? tools : activeProducts;
-
-    const rotationPeriod = 3;
-    const daysSinceEpoch = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
-    const rotationIndex = Math.floor((daysSinceEpoch + 1) / rotationPeriod);
-    const offset = rotationIndex % listToRotate.length;
-    const shifted = [...listToRotate.slice(offset), ...listToRotate.slice(0, offset)];
-    return shifted.slice(0, 2);
+    return list;
   };
 
   // 3. Hair Removal Product - check if active in the store
   const getHairRemovalProduct = () => {
-    if (activeProducts.length === 0) {
+    // Find the real active foam spray
+    const realFoam = activeProducts.find(p => p.handle.includes('hair-removal-spray') || p.handle.includes('depilatory') || p.title.toLowerCase().includes('foam spray'));
+    if (realFoam) return realFoam;
+
+    // Fallback mock only if store is completely empty / initial load
+    if (products.length === 0) {
       return {
         id: 'mock-foam-spray',
         title: 'Gentle Hair Removal Foam Spray',
@@ -160,7 +161,8 @@ export default function Homepage() {
         reviewCount: 184
       };
     }
-    return activeProducts.find(p => p.handle.includes('hair-removal-spray') || p.handle.includes('depilatory') || p.title.toLowerCase().includes('foam spray'));
+
+    return null; // Do not render if the store has active products but foam spray is not active
   };
 
   const bestSellers = getDTCBestSellers();
