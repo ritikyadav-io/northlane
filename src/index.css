@@ -1803,6 +1803,16 @@ input, select, textarea {
   border-bottom: 1px solid var(--color-border);
   background-color: var(--color-bg);
 }
+@media (max-width: 767px) {
+  .landing-desktop-links {
+    display: none !important;
+  }
+}
+@media (min-width: 768px) {
+  .landing-mobile-categories-scroll {
+    display: none !important;
+  }
+}
 
 .landing-hero {
   padding: 40px 0;

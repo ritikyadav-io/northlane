@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from '../Router';
 import { useCart } from '../CartContext';
-import { fetchProductByHandle } from '../shopify';
+import { fetchProductByHandle, fetchProducts } from '../shopify';
 
 export default function LandingPage() {
   const { navigate } = useRouter();
   const { addToCart } = useCart();
 
   const [product, setProduct] = useState(null);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [activeImage, setActiveImage] = useState('');
@@ -27,6 +28,8 @@ export default function LandingPage() {
             setSelectedVariant(data.variants[0]);
           }
         }
+        const allProducts = await fetchProducts(250);
+        setProducts(allProducts);
       } catch (err) {
         console.error('Failed to load landing page product:', err);
       } finally {
@@ -61,17 +64,77 @@ export default function LandingPage() {
   const currentPrice = selectedVariant ? selectedVariant.price : product.minPrice;
   const comparePrice = selectedVariant ? selectedVariant.compareAtPrice : product.compareAtPrice;
 
+  const CATEGORIES = [
+    { name: 'All', path: '/collections/all' },
+    { name: 'Lingerie & Nightwear', path: '/collections/lingerie-nightwear' },
+    { name: 'Beauty Tools & Accessories', path: '/collections/beauty-tools-accessories' },
+    { name: 'Wellness & Self-Care', path: '/collections/wellness-self-care' },
+    { name: 'Fashion & Shoes', path: '/collections/fashion-shoes' }
+  ];
+
+  const getDailyBestSellers = () => {
+    if (products.length === 0) return [];
+    
+    const beautyTools = products.filter(p => {
+      if (!p.productType) return false;
+      const pType = p.productType.toLowerCase();
+      const handle = p.handle.toLowerCase();
+      const title = p.title.toLowerCase();
+      
+      const keywords = [
+        'brush-cleaner', 'makeup', 'massager', 'hair-identifier', 
+        'mascara', 'hair-removal', 'depilatory', 'ear-wax', 
+        'eyelash', 'skincare', 'cosmetics', 'brush', 'slimming'
+      ];
+      const isLingerie = ['lingerie', 'bra', 'babydoll', 'teddy', 'thong', 'panties', 'chemise', 'nightwear']
+        .some(k => handle.includes(k) || title.includes(k));
+      if (isLingerie) return false;
+      
+      return pType.includes('beauty') || pType.includes('makeup') || pType.includes('cosmetics') || keywords.some(k => handle.includes(k) || title.includes(k));
+    });
+
+    if (beautyTools.length === 0) return [];
+
+    const daysSinceEpoch = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+    const offset = Math.floor(daysSinceEpoch / 5) % beautyTools.length;
+    const shifted = [...beautyTools.slice(offset), ...beautyTools.slice(0, offset)];
+    return shifted.slice(0, 4);
+  };
+  const bestSellers = getDailyBestSellers();
+
   return (
     <div className="landing-page-container" style={{ backgroundColor: 'var(--color-bg)' }}>
       {/* MINIMAL NAVBAR */}
-      <nav className="landing-nav">
-        <a 
-          href="/" 
-          onClick={(e) => { e.preventDefault(); navigate('/'); }}
-          style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--color-primary)', letterSpacing: '-0.5px' }}
-        >
-          NORTHLANE
-        </a>
+      <nav className="landing-nav" style={{ height: 'auto', minHeight: '60px', display: 'flex', flexDirection: 'column', borderBottom: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)' }}>
+        <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '60px', width: '100%', padding: '0 24px' }}>
+          <a 
+            href="/" 
+            onClick={(e) => { e.preventDefault(); navigate('/'); }}
+            style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--color-primary)', letterSpacing: '-0.5px' }}
+          >
+            NORTHLANE
+          </a>
+          
+          {/* Desktop Nav Links */}
+          <div className="landing-desktop-links" style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+            <span style={{ cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-text-muted)' }} onClick={() => navigate('/collections/all')} className="footer-link">All Products</span>
+            <span style={{ cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-text-muted)' }} onClick={() => navigate('/collections/lingerie-nightwear')} className="footer-link">Lingerie</span>
+            <span style={{ cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-text-muted)' }} onClick={() => navigate('/collections/beauty-tools-accessories')} className="footer-link">Beauty Tools</span>
+            <span style={{ cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-text-muted)' }} onClick={() => navigate('/collections/wellness-self-care')} className="footer-link">Wellness</span>
+            <span style={{ cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-text-muted)' }} onClick={() => navigate('/collections/fashion-shoes')} className="footer-link">Fashion & Shoes</span>
+          </div>
+        </div>
+        
+        {/* Mobile Horizontal scroll bar below nav on mobile */}
+        <div className="landing-mobile-categories-scroll" style={{ width: '100%', borderTop: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-secondary)', padding: '8px 16px' }}>
+          <div className="category-scroll" style={{ display: 'flex', gap: '12px', overflowX: 'auto', flexWrap: 'nowrap', WebkitOverflowScrolling: 'touch' }}>
+            <button className="category-pill" style={{ height: '32px', fontSize: '0.8rem', padding: '0 12px' }} onClick={() => navigate('/collections/all')}>All Products</button>
+            <button className="category-pill" style={{ height: '32px', fontSize: '0.8rem', padding: '0 12px' }} onClick={() => navigate('/collections/lingerie-nightwear')}>Lingerie</button>
+            <button className="category-pill" style={{ height: '32px', fontSize: '0.8rem', padding: '0 12px' }} onClick={() => navigate('/collections/beauty-tools-accessories')}>Beauty Tools</button>
+            <button className="category-pill" style={{ height: '32px', fontSize: '0.8rem', padding: '0 12px' }} onClick={() => navigate('/collections/wellness-self-care')}>Wellness</button>
+            <button className="category-pill" style={{ height: '32px', fontSize: '0.8rem', padding: '0 12px' }} onClick={() => navigate('/collections/fashion-shoes')}>Fashion & Shoes</button>
+          </div>
+        </div>
       </nav>
 
       {/* HERO SECTION */}
@@ -176,7 +239,7 @@ export default function LandingPage() {
                     <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
                   </svg>
                 </span>
-                <span>30-Day Guarantee</span>
+                <span>7-Day Guarantee</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', fontWeight: '600', color: 'var(--color-primary)' }}>
                 <span style={{ color: 'var(--color-accent)', display: 'flex' }}>
@@ -207,6 +270,104 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* CATEGORY BAR */}
+      <div className="category-bar" style={{ borderBottom: '1px solid var(--color-border)', borderTop: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-secondary)', padding: '12px 0' }}>
+        <div className="container">
+          <div className="category-scroll" style={{ display: 'flex', gap: '12px', overflowX: 'auto', flexWrap: 'nowrap', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat.name}
+                className="category-pill"
+                onClick={() => navigate(cat.path)}
+                style={{
+                  height: '38px',
+                  fontSize: '0.85rem',
+                  fontWeight: '600',
+                  padding: '0 20px',
+                  borderRadius: '20px',
+                  backgroundColor: 'var(--color-bg)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* BEST SELLERS */}
+      {bestSellers.length > 0 && (
+        <section className="section" style={{ padding: '40px 0', borderBottom: '1px solid var(--color-border)' }}>
+          <div className="container">
+            <div className="section-title-wrapper" style={{ marginBottom: '30px' }}>
+              <h2 className="section-title">Best Sellers</h2>
+              <p className="section-subtitle">Our most loved products, chosen by customers across the United States</p>
+            </div>
+            
+            <div className="product-grid" style={{ overflowX: 'auto', display: 'grid', gridAutoFlow: 'column', gridTemplateColumns: 'none', gap: '20px', paddingBottom: '16px' }} className="product-grid-best-sellers">
+              {bestSellers.map(bestProduct => {
+                const discount = (bestProduct.compareAtPrice && bestProduct.compareAtPrice > bestProduct.minPrice) 
+                  ? Math.round(((bestProduct.compareAtPrice - bestProduct.minPrice) / bestProduct.compareAtPrice) * 100)
+                  : 0;
+
+                return (
+                  <div 
+                    key={bestProduct.id} 
+                    className="product-card"
+                    onClick={() => navigate(`/products/${bestProduct.handle}`)}
+                    style={{ width: '100%', minWidth: '240px', cursor: 'pointer' }}
+                  >
+                    {discount > 0 && (
+                      <span className="discount-badge">SAVE {discount}%</span>
+                    )}
+                    <div className="product-card-img-wrapper">
+                      <img src={bestProduct.images[0]} alt={bestProduct.title} className="product-card-img" style={{ objectPosition: 'top' }} />
+                    </div>
+                    <div className="product-card-body">
+                      <span className="product-card-type">{bestProduct.productType}</span>
+                      <h3 className="product-card-title" style={{ fontSize: '0.95rem', height: '2.5rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', margin: '0 0 8px' }}>
+                        {bestProduct.title}
+                      </h3>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '4px 0 8px' }}>
+                        <div className="star-rating" style={{ margin: 0, fontSize: '0.85rem' }}>
+                          {Array(5).fill().map((_, starIdx) => (
+                            <span key={starIdx} style={{ color: starIdx < 5 ? '#FBBF24' : '#E2E8F0' }}>★</span>
+                          ))}
+                        </div>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>(28)</span>
+                      </div>
+                      <div className="product-card-price-row">
+                        <span className="price-current">${bestProduct.minPrice.toFixed(2)}</span>
+                        {bestProduct.compareAtPrice > bestProduct.minPrice && (
+                          <span className="price-compare">${bestProduct.compareAtPrice.toFixed(2)}</span>
+                        )}
+                      </div>
+                      <button
+                        className="btn btn-primary btn-full"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (bestProduct.variants && bestProduct.variants.length > 0) {
+                            addToCart(bestProduct, bestProduct.variants[0], 1);
+                          }
+                        }}
+                        style={{ padding: '10px 16px', fontSize: '0.85rem', marginTop: '10px' }}
+                      >
+                        Add to Cart
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* PROBLEM & SOLUTION SECTION */}
       <section className="section">
@@ -391,7 +552,7 @@ export default function LandingPage() {
                 </tr>
                 <tr>
                   <td>Warranty</td>
-                  <td className="compare-highlight">30-Day Hassle-Free</td>
+                  <td className="compare-highlight">7-Day Hassle-Free</td>
                   <td>None</td>
                   <td>Limited 1-Year</td>
                 </tr>
@@ -532,23 +693,47 @@ export default function LandingPage() {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ marginRight: '4px' }}>
               <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
-            <span>30-Day Hassle-Free Money Back Guarantee</span>
+            <span>7-Day Hassle-Free Money Back Guarantee</span>
           </div>
         </div>
       </section>
 
       {/* MINIMAL FOOTER */}
-      <footer style={{ padding: '40px 0', borderTop: '1px solid var(--color-border)', textAlign: 'center', backgroundColor: 'var(--color-bg-secondary)' }}>
-        <div className="container">
-          <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', margin: '0 0 12px' }}>
-            Copyright 2026 Northlane. All rights reserved.
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
-            <span style={{ cursor: 'pointer' }} onClick={() => navigate('/policies/privacy')} className="footer-link">Privacy Policy</span>
-            <span>|</span>
-            <span style={{ cursor: 'pointer' }} onClick={() => navigate('/policies/terms')} className="footer-link">Terms of Service</span>
-            <span>|</span>
-            <span style={{ cursor: 'pointer' }} onClick={() => navigate('/policies/shipping')} className="footer-link">Shipping & Returns</span>
+      <footer style={{ padding: '45px 0', borderTop: '1px solid var(--color-border)', textAlign: 'center', backgroundColor: 'var(--color-bg-secondary)' }}>
+        <div className="container" style={{ maxWidth: '800px' }}>
+          {/* Categories Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '24px', marginBottom: '30px', textAlign: 'left' }} className="landing-footer-grid">
+            <div>
+              <h4 style={{ fontSize: '0.9rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '14px', color: 'var(--color-primary)' }}>Shop Collections</h4>
+              <ul style={{ listStyleType: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.85rem' }}>
+                <li><span style={{ cursor: 'pointer' }} onClick={() => navigate('/collections/all')} className="footer-link">All Products</span></li>
+                <li><span style={{ cursor: 'pointer' }} onClick={() => navigate('/collections/lingerie-nightwear')} className="footer-link">Lingerie & Nightwear</span></li>
+                <li><span style={{ cursor: 'pointer' }} onClick={() => navigate('/collections/beauty-tools-accessories')} className="footer-link">Beauty Tools & Accessories</span></li>
+                <li><span style={{ cursor: 'pointer' }} onClick={() => navigate('/collections/wellness-self-care')} className="footer-link">Wellness & Self-Care</span></li>
+                <li><span style={{ cursor: 'pointer' }} onClick={() => navigate('/collections/fashion-shoes')} className="footer-link">Fashion & Shoes</span></li>
+              </ul>
+            </div>
+            <div>
+              <h4 style={{ fontSize: '0.9rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '14px', color: 'var(--color-primary)' }}>Customer Support</h4>
+              <ul style={{ listStyleType: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.85rem' }}>
+                <li><span style={{ cursor: 'pointer' }} onClick={() => navigate('/policies/shipping')} className="footer-link">Shipping & Returns Policy</span></li>
+                <li><span style={{ cursor: 'pointer' }} onClick={() => navigate('/policies/privacy')} className="footer-link">Privacy Policy</span></li>
+                <li><span style={{ cursor: 'pointer' }} onClick={() => navigate('/policies/terms')} className="footer-link">Terms of Service</span></li>
+                <li><span style={{ cursor: 'pointer' }} onClick={() => navigate('/about')} className="footer-link">About Us</span></li>
+              </ul>
+            </div>
+            <div>
+              <h4 style={{ fontSize: '0.9rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '14px', color: 'var(--color-primary)' }}>Northlane US</h4>
+              <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', lineHeight: '1.4', margin: 0 }}>
+                Premium self-care, accessories, and wellness essentials. Shipped directly from US fulfillment centers.
+              </p>
+            </div>
+          </div>
+          
+          <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '20px' }}>
+            <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: 0 }}>
+              &copy; 2026 Northlane. All rights reserved. Secure SSL checkout with 7-Day Hassle-Free Returns.
+            </p>
           </div>
         </div>
       </footer>

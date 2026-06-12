@@ -124,6 +124,8 @@ export default function CollectionsPage() {
   const { addToCart } = useCart();
 
   const categoryScrollRef = useRef(null);
+  // Ref to store scroll position before changing category
+  const scrollPosRef = useRef(0);
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -171,6 +173,12 @@ export default function CollectionsPage() {
           behavior: 'smooth'
         });
       }
+    }
+    // Restore previous scroll position after category change
+    if (scrollPosRef.current) {
+      window.scrollTo({ top: scrollPosRef.current, behavior: 'smooth' });
+      // Reset after restoring
+      scrollPosRef.current = 0;
     }
   }, [selectedCategory]);
 
@@ -329,6 +337,8 @@ export default function CollectionsPage() {
               key={cat}
               className={`category-pill ${selectedCategory === cat ? 'active' : ''}`}
               onClick={() => {
+                // Preserve scroll position before category change
+                scrollPosRef.current = window.scrollY;
                 setSelectedCategory(cat);
                 setVisibleCount(24);
               }}
@@ -413,7 +423,7 @@ export default function CollectionsPage() {
             <ul className="filter-links-list">
               <li 
                 className={`filter-link-item ${selectedCategory === 'All' ? 'active' : ''}`}
-                onClick={() => { setSelectedCategory('All'); setVisibleCount(24); }}
+                onClick={() => { scrollPosRef.current = window.scrollY; setSelectedCategory('All'); setVisibleCount(24); }}
               >
                 <span>All Categories</span>
                 <span>({products.length})</span>
@@ -424,7 +434,7 @@ export default function CollectionsPage() {
                   <li 
                     key={cat}
                     className={`filter-link-item ${selectedCategory === cat ? 'active' : ''}`}
-                    onClick={() => { setSelectedCategory(cat); setVisibleCount(24); }}
+                    onClick={() => { scrollPosRef.current = window.scrollY; setSelectedCategory(cat); setVisibleCount(24); }}
                   >
                     <span>{cat}</span>
                     <span>({count})</span>
@@ -748,7 +758,7 @@ export default function CollectionsPage() {
           <ul className="filter-links-list">
             <li 
               className={`filter-link-item ${selectedCategory === 'All' ? 'active' : ''}`}
-              onClick={() => { setSelectedCategory('All'); setIsFilterDrawerOpen(false); setVisibleCount(24); }}
+              onClick={() => { scrollPosRef.current = window.scrollY; setSelectedCategory('All'); setIsFilterDrawerOpen(false); setVisibleCount(24); }}
             >
               <span>All Categories</span>
               <span>({products.length})</span>
@@ -759,7 +769,7 @@ export default function CollectionsPage() {
                 <li 
                   key={cat}
                   className={`filter-link-item ${selectedCategory === cat ? 'active' : ''}`}
-                  onClick={() => { setSelectedCategory(cat); setIsFilterDrawerOpen(false); setVisibleCount(24); }}
+                  onClick={() => { scrollPosRef.current = window.scrollY; setSelectedCategory(cat); setIsFilterDrawerOpen(false); setVisibleCount(24); }}
                 >
                   <span>{cat}</span>
                   <span>({count})</span>
