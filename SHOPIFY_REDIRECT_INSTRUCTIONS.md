@@ -23,14 +23,40 @@ To ensure that tapping the **"Northlane"** logo or the **"Return to cart"** butt
 
 ```html
 <script>
-  // Redirect visitors back to your custom storefront
-  var customStorefront = 'https://northlaneofficial.shop'; // Your production domain
-  
-  // Smart detection: if testing locally, keep redirecting to localhost
-  if (document.referrer.indexOf('localhost') > -1 || window.location.search.indexOf('dev=true') > -1) {
-    customStorefront = 'http://localhost:5173';
+  // Redirect visitors back to your custom storefront dynamically
+  var customStorefront = '';
+
+  // 1. Try to detect storefront origin from referrer
+  if (document.referrer) {
+    try {
+      var referrerUrl = new URL(document.referrer);
+      // Ensure the referrer is not the Shopify domain itself
+      if (referrerUrl.hostname !== window.location.hostname && !referrerUrl.hostname.includes('myshopify.com')) {
+        customStorefront = referrerUrl.origin;
+        try {
+          sessionStorage.setItem('custom_storefront', customStorefront);
+        } catch (e) {}
+      }
+    } catch (e) {}
   }
-    
+
+  // 2. Retrieve the stored storefront URL if referrer is not available
+  if (!customStorefront) {
+    try {
+      customStorefront = sessionStorage.getItem('custom_storefront');
+    } catch (e) {}
+  }
+
+  // 3. Fallbacks: if no storefront detected, check for local development query or referrer, or use default origin
+  if (!customStorefront) {
+    if (window.location.search.indexOf('dev=true') > -1) {
+      customStorefront = 'http://localhost:5173';
+    } else {
+      // If we don't have a storefront URL yet, we fall back to the window origin (stay on Shopify store)
+      customStorefront = window.location.origin;
+    }
+  }
+
   if (window.location.hostname === 'northlanesite.myshopify.com') {
     // If they clicked "Return to cart", redirect them back and open the cart drawer
     if (window.location.pathname.indexOf('/cart') === 0) {

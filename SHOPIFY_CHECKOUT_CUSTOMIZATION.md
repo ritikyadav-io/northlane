@@ -35,3 +35,6 @@ If you want to keep the "Northlane" branding but ensure that when users tap it, 
    * Click on the domain `northlaneofficial.shop` and select **Set as primary**.
 
 *Once `northlaneofficial.shop` is set as your store's primary domain, Shopify will automatically rewrite the checkout logo link to point directly to `https://northlaneofficial.shop/`!*
+
+> [!TIP]
+> **Temporary Removal**: If you haven't bought/launched the custom domain yet or want to remove it for now, change your Shopify store's **Primary Domain** back to your default `.myshopify.com` domain (or active staging domain) in the settings. Then, use the dynamic redirection script outlined in [SHOPIFY_REDIRECT_INSTRUCTIONS.md](file:///c:/Users/prime/OneDrive/Desktop/Northlane/SHOPIFY_REDIRECT_INSTRUCTIONS.md) to redirect visitors to whatever active storefront they came from.
