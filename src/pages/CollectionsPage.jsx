@@ -159,7 +159,17 @@ export default function CollectionsPage() {
     if (categoryScrollRef.current) {
       const activeEl = categoryScrollRef.current.querySelector('.category-pill.active');
       if (activeEl) {
-        activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        const container = categoryScrollRef.current;
+        const containerWidth = container.clientWidth;
+        const pillOffset = activeEl.offsetLeft;
+        const pillWidth = activeEl.clientWidth;
+        
+        const scrollTarget = pillOffset - (containerWidth / 2) + (pillWidth / 2);
+        
+        container.scrollTo({
+          left: scrollTarget,
+          behavior: 'smooth'
+        });
       }
     }
   }, [selectedCategory]);

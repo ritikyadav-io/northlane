@@ -74,18 +74,25 @@ export default function Homepage() {
   }, []);
 
   useEffect(() => {
-    if (categoryScrollRef.current) {
-      const activeEl = categoryScrollRef.current.querySelector('.category-pill.active');
-      if (activeEl) {
-        activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-      }
-    }
-    if (shopCategoryScrollRef.current) {
-      const activeEl = shopCategoryScrollRef.current.querySelector('.category-pill.active');
-      if (activeEl) {
-        activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-      }
-    }
+    const centerActivePill = (container) => {
+      if (!container) return;
+      const activeEl = container.querySelector('.category-pill.active');
+      if (!activeEl) return;
+      
+      const containerWidth = container.clientWidth;
+      const pillOffset = activeEl.offsetLeft;
+      const pillWidth = activeEl.clientWidth;
+      
+      const scrollTarget = pillOffset - (containerWidth / 2) + (pillWidth / 2);
+      
+      container.scrollTo({
+        left: scrollTarget,
+        behavior: 'smooth'
+      });
+    };
+
+    centerActivePill(categoryScrollRef.current);
+    centerActivePill(shopCategoryScrollRef.current);
   }, [activeCategory]);
 
   // Filter products by category, search query, sale status, and price
