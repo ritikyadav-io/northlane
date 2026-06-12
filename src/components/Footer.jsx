@@ -13,109 +13,137 @@ export default function Footer() {
   };
 
   return (
-    <footer id="footer" style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-bg-secondary)', padding: '60px 0 30px', borderTop: '1px solid var(--color-border)' }}>
-      <div className="container">
-        
-        {/* Row 1: Logo and Short description */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '30px', marginBottom: '40px', gap: '20px' }}>
-          <span style={{ fontSize: '1.75rem', fontWeight: '800', letterSpacing: '-0.5px', color: 'var(--color-bg)' }}>NORTHLANE</span>
-          <p style={{ fontSize: '0.95rem', color: '#CBD5E1', maxWidth: '500px', margin: '0' }}>
-            Premium everyday products for modern living, delivered across the United States.
+    <footer id="footer" className="dtc-footer">
+      <style>{`
+        .dtc-footer {
+          background-color: #FCF8F5; /* Matches warm background theme */
+          border-top: 1px solid #E9ECEF;
+          padding: 60px 0 40px;
+          font-family: 'Manrope', sans-serif;
+          color: #1B2A4A;
+        }
+        .footer-dtc-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 32px;
+          text-align: center;
+        }
+        .footer-logo {
+          font-size: 1.5rem;
+          font-weight: 800;
+          letter-spacing: -0.5px;
+          color: #1B2A4A;
+        }
+        .footer-dtc-links {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 16px 32px;
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+        .footer-dtc-link {
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: #4A5568;
+          transition: color 0.2s;
+        }
+        .footer-dtc-link:hover {
+          color: #C9A84C;
+        }
+        .footer-dtc-bottom {
+          width: 100%;
+          border-top: 1px solid #E9ECEF;
+          padding-top: 24px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 16px;
+        }
+        .footer-dtc-copy {
+          font-size: 0.8rem;
+          color: #718096;
+        }
+        .footer-dtc-payments {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .payment-pill {
+          font-size: 0.75rem;
+          font-weight: 700;
+          color: #1B2A4A;
+          background-color: #FFFFFF;
+          padding: 4px 10px;
+          border-radius: 4px;
+          border: 1px solid #E9ECEF;
+        }
+        @media (max-width: 768px) {
+          .footer-dtc-links {
+            flex-direction: column;
+            gap: 16px;
+          }
+          .footer-dtc-bottom {
+            flex-direction: column;
+            text-align: center;
+            justify-content: center;
+          }
+        }
+      `}</style>
+
+      <div className="container footer-dtc-container">
+        {/* Brand Logo */}
+        <span className="footer-logo">NORTHLANE</span>
+
+        {/* Minimal Links */}
+        <ul className="footer-dtc-links">
+          <li>
+            <Link to="/" className="footer-dtc-link">Home</Link>
+          </li>
+          <li>
+            <Link to="/collections/all" className="footer-dtc-link">Shop</Link>
+          </li>
+          <li>
+            <a 
+              href="#best-sellers" 
+              className="footer-dtc-link"
+              onClick={(e) => {
+                e.preventDefault();
+                handleScrollToSection('best-sellers');
+              }}
+            >
+              Best Sellers
+            </a>
+          </li>
+          <li>
+            <Link to="/pages/contact" className="footer-dtc-link">Contact</Link>
+          </li>
+          <li>
+            <Link to="/policies/privacy" className="footer-dtc-link">Privacy Policy</Link>
+          </li>
+          <li>
+            <Link to="/policies/terms" className="footer-dtc-link">Terms of Service</Link>
+          </li>
+        </ul>
+
+        {/* Bottom copyright and payments */}
+        <div className="footer-dtc-bottom">
+          <p className="footer-dtc-copy">
+            &copy; 2026 Northlane. All rights reserved. Secure SSL checkout.
           </p>
-        </div>
 
-        {/* Row 2: Four Columns */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '40px', marginBottom: '40px' }}>
-          
-          {/* Col 1: Shop */}
-          <div>
-            <h4 style={{ color: 'var(--color-bg)', fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px', fontWeight: '700' }}>Shop</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px', padding: 0 }}>
-              <li><Link to="/collections/all" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">All Products</Link></li>
-              <li><a href="#best-sellers" onClick={(e) => { e.preventDefault(); handleScrollToSection('best-sellers'); }} style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Best Sellers</a></li>
-              <li><Link to="/collections/lingerie-nightwear" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Lingerie & Nightwear</Link></li>
-              <li><Link to="/collections/beauty-tools-accessories" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Beauty Tools & Accessories</Link></li>
-              <li><Link to="/collections/wellness-selfcare" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Wellness & Self-Care</Link></li>
-              <li><Link to="/collections/fashion-shoes" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Fashion & Shoes</Link></li>
-            </ul>
-          </div>
-
-          {/* Col 2: Help */}
-          <div>
-            <h4 style={{ color: 'var(--color-bg)', fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px', fontWeight: '700' }}>Help</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px', padding: 0 }}>
-              <li><a href="#faq" onClick={(e) => { e.preventDefault(); handleScrollToSection('faq'); }} style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">FAQ</a></li>
-              <li><Link to="/pages/contact" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Track My Order</Link></li>
-              <li><Link to="/pages/contact" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Contact Us</Link></li>
-              <li><Link to="/policies/shipping" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Shipping Policy</Link></li>
-              <li><Link to="/policies/refund" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Return Policy</Link></li>
-            </ul>
-          </div>
-
-          {/* Col 3: Company */}
-          <div>
-            <h4 style={{ color: 'var(--color-bg)', fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px', fontWeight: '700' }}>Company</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px', padding: 0 }}>
-              <li><Link to="/pages/about" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">About Us</Link></li>
-              <li><Link to="/policies/privacy" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Privacy Policy</Link></li>
-              <li><Link to="/policies/terms" style={{ fontSize: '0.9rem', color: '#94A3B8' }} className="footer-link">Terms of Service</Link></li>
-            </ul>
-          </div>
-
-          {/* Col 4: Connect */}
-          <div>
-            <h4 style={{ color: 'var(--color-bg)', fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px', fontWeight: '700' }}>Connect</h4>
-            <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
-              <a href="#" aria-label="Facebook" style={{ display: 'flex', padding: '8px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.08)', color: '#fff' }} className="footer-social-btn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                </svg>
-              </a>
-              <a href="#" aria-label="Instagram" style={{ display: 'flex', padding: '8px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.08)', color: '#fff' }} className="footer-social-btn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                </svg>
-              </a>
-            </div>
-            <p style={{ fontSize: '0.9rem', color: '#94A3B8', margin: 0 }}>
-              Email: <a href="mailto:support@northlane.com" style={{ color: '#fff', fontWeight: '600' }}>support@northlane.com</a>
-            </p>
-          </div>
-
-        </div>
-
-        {/* Row 3: Bottom Copyright & Payments */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255, 255, 255, 0.1)', paddingTop: '20px', gap: '20px' }}>
-          <p style={{ fontSize: '0.85rem', color: '#94A3B8', margin: 0 }}>
-            Copyright 2026 Northlane. All rights reserved.
-          </p>
-          
-          {/* Payment Badges */}
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.8rem', color: '#94A3B8', marginRight: '4px', fontWeight: '500' }}>Accepted Payments:</span>
+          <div className="footer-dtc-payments">
             {['Visa', 'Mastercard', 'PayPal', 'Amex', 'Shop Pay'].map(name => (
-              <span key={name} style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-primary)', backgroundColor: 'var(--color-bg-secondary)', padding: '4px 10px', borderRadius: '3px', border: '1px solid rgba(255,255,255,0.2)' }}>
+              <span key={name} className="payment-pill">
                 {name}
               </span>
             ))}
           </div>
         </div>
-
       </div>
-      
-      {/* Styles for hover states in footer */}
-      <style>{`
-        .footer-link:hover {
-          color: var(--color-accent) !important;
-          padding-left: 2px;
-        }
-        .footer-social-btn:hover {
-          background-color: var(--color-accent) !important;
-          color: var(--color-primary) !important;
-        }
-      `}</style>
     </footer>
   );
 }
