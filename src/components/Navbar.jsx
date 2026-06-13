@@ -178,7 +178,7 @@ export default function Navbar() {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Search lingerie, face tools, brushes, makeup kits..."
+                  placeholder="Search beauty essentials..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   style={{
@@ -249,28 +249,38 @@ export default function Navbar() {
         onClick={() => setIsMobileMenuOpen(false)}
       ></div>
       <div className={`mobile-nav ${isMobileMenuOpen ? 'open' : ''}`}>
-        <div className="mobile-nav-header">
-          <span className="nav-logo" style={{ fontSize: '1.35rem' }}>NORTHLANE</span>
-          <button 
-            onClick={() => setIsMobileMenuOpen(false)}
-            aria-label="Close menu"
-            style={{ padding: '4px' }}
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-        <ul className="mobile-nav-links">
+        <button 
+          onClick={() => setIsMobileMenuOpen(false)}
+          aria-label="Close menu"
+          style={{ 
+            position: 'absolute', 
+            top: '16px', 
+            right: '16px', 
+            width: '44px', 
+            height: '44px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            color: 'var(--color-primary)'
+          }}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+
+        <ul className="mobile-nav-links" style={{ marginTop: '48px', padding: 0 }}>
           <li>
-            <button className="mobile-nav-link" onClick={() => handleMobileLinkClick('/')}>
-              Home
+            <button className="mobile-nav-link" onClick={() => handleMobileLinkClick('/')} style={{ padding: '12px 0', width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px', minHeight: '44px', color: 'var(--color-primary)', borderBottom: '1px solid var(--color-border)' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-accent)' }}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+              <span style={{ fontWeight: '600', fontSize: '1rem' }}>Home</span>
             </button>
           </li>
           <li>
-            <button className="mobile-nav-link" onClick={() => handleMobileLinkClick('/collections/all')}>
-              Shop All
+            <button className="mobile-nav-link" onClick={() => handleMobileLinkClick('/collections/all')} style={{ padding: '12px 0', width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px', minHeight: '44px', color: 'var(--color-primary)', borderBottom: '1px solid var(--color-border)' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-accent)' }}><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+              <span style={{ fontWeight: '600', fontSize: '1rem' }}>Shop All</span>
             </button>
           </li>
           <li>
@@ -284,24 +294,40 @@ export default function Navbar() {
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }, 100);
               }}
+              style={{ padding: '12px 0', width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px', minHeight: '44px', color: 'var(--color-primary)', borderBottom: '1px solid var(--color-border)' }}
             >
-              Best Sellers
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-accent)' }}><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
+              <span style={{ fontWeight: '600', fontSize: '1rem' }}>Best Sellers</span>
             </button>
           </li>
           <li>
             <button 
               className="mobile-nav-link" 
-              onClick={() => handleMobileLinkClick('/pages/about')}
+              onClick={() => handleMobileLinkClick('/collections/new-arrivals')}
+              style={{ padding: '12px 0', width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px', minHeight: '44px', color: 'var(--color-primary)', borderBottom: '1px solid var(--color-border)' }}
             >
-              About Us
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-accent)' }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              <span style={{ fontWeight: '600', fontSize: '1rem' }}>New Arrivals</span>
+            </button>
+          </li>
+          <li>
+            <button 
+              className="mobile-nav-link" 
+              onClick={() => handleMobileLinkClick('/policies/track-order')}
+              style={{ padding: '12px 0', width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px', minHeight: '44px', color: 'var(--color-primary)', borderBottom: '1px solid var(--color-border)' }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-accent)' }}><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+              <span style={{ fontWeight: '600', fontSize: '1rem' }}>Track Order</span>
             </button>
           </li>
           <li>
             <button 
               className="mobile-nav-link" 
               onClick={() => handleMobileLinkClick('/pages/contact')}
+              style={{ padding: '12px 0', width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px', minHeight: '44px', color: 'var(--color-primary)', borderBottom: '1px solid var(--color-border)' }}
             >
-              Contact
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-accent)' }}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              <span style={{ fontWeight: '600', fontSize: '1rem' }}>Contact</span>
             </button>
           </li>
         </ul>
@@ -324,7 +350,7 @@ export default function Navbar() {
             <input 
               type="text" 
               className="search-modal-input"
-              placeholder="Search the boutique..." 
+              placeholder="Search beauty essentials..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoFocus={isSearchOpen}

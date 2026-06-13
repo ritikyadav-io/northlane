@@ -749,19 +749,7 @@ export async function createCheckout(lineItems) {
   }
   
   const rawUrl = data?.cartCreate?.cart?.checkoutUrl;
-  if (!rawUrl) return rawUrl;
-
-  try {
-    const parsedUrl = new URL(rawUrl);
-    // Replace hostname with DOMAIN if they differ to bypass any inactive custom domains
-    if (parsedUrl.hostname !== DOMAIN) {
-      parsedUrl.hostname = DOMAIN;
-    }
-    return parsedUrl.toString();
-  } catch (e) {
-    console.error('[Shopify] Failed to parse checkout URL:', e);
-    return rawUrl;
-  }
+  return rawUrl;
 }
 
 // Export the store domain for use in fallback cart URLs

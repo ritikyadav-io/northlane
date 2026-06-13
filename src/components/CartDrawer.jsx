@@ -157,23 +157,23 @@ export default function CartDrawer() {
 
         {/* Footer Subtotal & Checkout */}
         {cart.length > 0 && (
-          <div className="cart-drawer-footer">
-            <div className="cart-subtotal-row">
-              <span className="subtotal-label">Subtotal</span>
-              <span className="subtotal-price">${subtotal.toFixed(2)}</span>
+          <div className="cart-drawer-footer" style={{ padding: '16px 20px', borderTop: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)' }}>
+            <div className="cart-subtotal-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', fontSize: '1rem' }}>
+              <span className="subtotal-label" style={{ fontWeight: '600', color: 'var(--color-text-muted)' }}>Subtotal</span>
+              <span className="subtotal-price" style={{ fontWeight: '800', color: 'var(--color-primary)', fontSize: '1.1rem' }}>${subtotal.toFixed(2)}</span>
             </div>
             
-            <div className="cart-actions-row">
+            <div className="cart-actions-row" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
               <button
                 className="btn btn-accent btn-full"
                 onClick={handleCheckout}
                 disabled={checkoutLoading}
-                style={{ height: '48px' }}
+                style={{ height: '44px', width: '100%', borderRadius: '6px', fontSize: '0.9rem', fontWeight: '700' }}
               >
                 {checkoutLoading ? (
                   <>
                     <span className="spinner"></span>
-                    Processing Checkout...
+                    Processing...
                   </>
                 ) : (
                   'Secure Checkout'
@@ -181,15 +181,27 @@ export default function CartDrawer() {
               </button>
               
               <button
-                className="btn btn-outline btn-full"
+                className="cart-continue-link"
                 onClick={() => setIsCartOpen(false)}
-                style={{ height: '48px' }}
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  color: 'var(--color-text-muted)', 
+                  fontSize: '0.8rem', 
+                  fontWeight: '600', 
+                  textDecoration: 'underline', 
+                  cursor: 'pointer', 
+                  minHeight: '36px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
               >
                 Continue Shopping
               </button>
             </div>
-            <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textAlign: 'center', marginTop: '12px' }}>
-              Shipping and taxes calculated at checkout. SSL Encrypted Connection.
+            <p style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', textAlign: 'center', marginTop: '6px', margin: '6px 0 0 0' }}>
+              Shipping and taxes calculated at checkout. SSL Encrypted.
             </p>
           </div>
         )}

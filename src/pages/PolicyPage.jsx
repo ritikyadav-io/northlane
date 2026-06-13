@@ -8,6 +8,11 @@ export default function PolicyPage({ type }) {
   const [formData, setFormData] = useState({ name: '', email: '', order: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
 
+  // Tracking State
+  const [trackOrderId, setTrackOrderId] = useState('');
+  const [trackEmail, setTrackEmail] = useState('');
+  const [trackingResult, setTrackingResult] = useState(null);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (formData.name && formData.email && formData.message) {
@@ -16,8 +21,129 @@ export default function PolicyPage({ type }) {
     }
   };
 
+  const handleTrackSubmit = (e) => {
+    e.preventDefault();
+    if (trackOrderId && trackEmail) {
+      // Simulate tracking response
+      setTrackingResult({
+        orderId: trackOrderId.startsWith('#') ? trackOrderId : `#${trackOrderId}`,
+        status: 'In Transit',
+        carrier: 'USPS Priority Mail',
+        trackingNum: '9400111899562203114972',
+        estDelivery: 'June 16, 2026',
+        steps: [
+          { date: 'June 13, 2026 - 8:30 AM', loc: 'Atlanta, GA Fulfillment Center', desc: 'In Transit - Dispatched to carrier sorting facility.', current: true },
+          { date: 'June 12, 2026 - 2:14 PM', loc: 'Atlanta, GA Fulfillment Center', desc: 'Order sorted and packaged. Ready for carrier pick-up.', current: false },
+          { date: 'June 11, 2026 - 3:45 PM', loc: 'Atlanta, GA', desc: 'Payment verified & order sent to packaging queue.', current: false },
+          { date: 'June 11, 2026 - 10:23 AM', loc: 'Northlane Storefront', desc: 'Order placed by customer.', current: false }
+        ]
+      });
+    }
+  };
+
   const renderPolicyContent = () => {
     switch (type) {
+      case 'track-order':
+        return (
+          <div style={{ maxWidth: '600px', margin: '0 auto', padding: '12px 0' }}>
+            <h1 className="policy-title" style={{ textAlign: 'center', marginBottom: '8px' }}>Track Your Order</h1>
+            <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '32px' }}>
+              Enter your Order Number and Email to check the real-time shipping progress of your package.
+            </p>
+
+            {!trackingResult ? (
+              <form onSubmit={handleTrackSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px', backgroundColor: 'var(--color-bg-secondary)', padding: '24px', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--color-primary)' }}>Order ID / Number</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. #NL1024"
+                    value={trackOrderId}
+                    onChange={(e) => setTrackOrderId(e.target.value)}
+                    style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: '#fff', fontSize: '0.9rem', outline: 'none' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--color-primary)' }}>Email Address</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="e.g. customer@example.com"
+                    value={trackEmail}
+                    onChange={(e) => setTrackEmail(e.target.value)}
+                    style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: '#fff', fontSize: '0.9rem', outline: 'none' }}
+                  />
+                </div>
+                <button type="submit" className="btn btn-primary" style={{ height: '48px', borderRadius: '8px', fontSize: '0.95rem', fontWeight: '700' }}>
+                  Track Shipment
+                </button>
+              </form>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                {/* Summary Box */}
+                <div style={{ backgroundColor: 'var(--color-bg-secondary)', padding: '20px', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--color-border)', paddingBottom: '12px', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                    <div>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', display: 'block' }}>Order ID</span>
+                      <strong style={{ fontSize: '1rem', color: 'var(--color-primary)' }}>{trackingResult.orderId}</strong>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', display: 'block' }}>Carrier</span>
+                      <strong style={{ fontSize: '1rem', color: 'var(--color-primary)' }}>{trackingResult.carrier}</strong>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', display: 'block' }}>Est. Delivery</span>
+                      <strong style={{ fontSize: '1rem', color: 'var(--color-accent)' }}>{trackingResult.estDelivery}</strong>
+                    </div>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>USPS Tracking Number: </span>
+                    <strong style={{ fontSize: '0.85rem', color: 'var(--color-primary)', fontFamily: 'monospace' }}>{trackingResult.trackingNum}</strong>
+                  </div>
+                </div>
+
+                {/* Timeline Box */}
+                <div style={{ padding: '8px 12px' }}>
+                  <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--color-primary)', marginBottom: '20px' }}>Delivery Progress</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', position: 'relative', paddingLeft: '24px' }}>
+                    {/* Timeline vertical line */}
+                    <div style={{ position: 'absolute', left: '7px', top: '10px', bottom: '10px', width: '2px', backgroundColor: '#E2E8F0' }}></div>
+                    
+                    {trackingResult.steps.map((step, idx) => (
+                      <div key={idx} style={{ position: 'relative', marginBottom: '28px' }}>
+                        {/* Dot indicator */}
+                        <div style={{
+                          position: 'absolute',
+                          left: '-24px',
+                          top: '3px',
+                          width: '16px',
+                          height: '16px',
+                          borderRadius: '50%',
+                          backgroundColor: step.current ? 'var(--color-accent)' : '#fff',
+                          border: step.current ? '3px solid #FFF' : '3px solid #CBD5E1',
+                          boxShadow: step.current ? '0 0 0 3px var(--color-accent)' : 'none',
+                          zIndex: 1
+                        }}></div>
+                        
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '4px' }}>
+                          <strong style={{ fontSize: '0.85rem', color: step.current ? 'var(--color-primary)' : 'var(--color-text)' }}>{step.loc}</strong>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>{step.date}</span>
+                        </div>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: '4px 0 0' }}>{step.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <button onClick={() => setTrackingResult(null)} className="btn btn-secondary" style={{ alignSelf: 'center', height: '40px', borderRadius: '8px' }}>
+                  Track Another Shipment
+                </button>
+              </div>
+            )}
+          </div>
+        );
+
       case 'privacy':
         return (
           <>
@@ -284,14 +410,7 @@ export default function PolicyPage({ type }) {
   return (
     <div className="container" style={{ padding: '40px 24px 80px', maxWidth: '900px' }}>
       
-      {/* Back Button */}
-      <button onClick={() => window.history.back()} className="back-btn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="19" y1="12" x2="5" y2="12"></line>
-          <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-        Go Back
-      </button>
+
 
       <div className="policy-card-box">
         {renderPolicyContent()}

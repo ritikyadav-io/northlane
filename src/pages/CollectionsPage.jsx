@@ -7,96 +7,73 @@ function mapHandleToCategory(handle) {
   if (!handle || handle === 'all') return 'All';
   
   const mapping = {
-    'lingerie-nightwear': 'Lingerie & Nightwear',
-    'lingerie': 'Lingerie & Nightwear',
-    'nightwear': 'Lingerie & Nightwear',
-    'beauty-tools-accessories': 'Beauty Tools & Accessories',
-    'beauty-tools': 'Beauty Tools & Accessories',
-    'accessories': 'Beauty Tools & Accessories',
-    'beauty': 'Beauty Tools & Accessories',
-    'skincare-creams': 'Beauty Tools & Accessories',
-    'creams': 'Beauty Tools & Accessories',
-    'skincare': 'Beauty Tools & Accessories',
-    'serums': 'Beauty Tools & Accessories',
-    'cosmetics-nails': 'Beauty Tools & Accessories',
-    'cosmetics': 'Beauty Tools & Accessories',
-    'nails': 'Beauty Tools & Accessories',
-    'eye': 'Beauty Tools & Accessories',
-    'wellness-selfcare': 'Wellness & Self-Care',
-    'wellness': 'Wellness & Self-Care',
-    'selfcare': 'Wellness & Self-Care',
-    'fashion-shoes': 'Fashion & Shoes',
-    'shoes': 'Fashion & Shoes',
-    'heels': 'Fashion & Shoes',
-    'fashion': 'Fashion & Shoes'
+    'makeup-essentials': 'Makeup Essentials',
+    'skincare': 'Skincare',
+    'beauty-tools': 'Beauty Tools',
+    'hair-removal': 'Hair Removal',
+    'self-care': 'Self-Care',
+    'nail-care': 'Nail Care',
+    'best-sellers': 'Best Sellers',
+    'new-arrivals': 'New Arrivals',
+    // fallback old ones
+    'lingerie-nightwear': 'Self-Care',
+    'lingerie': 'Self-Care',
+    'nightwear': 'Self-Care',
+    'beauty-tools-accessories': 'Beauty Tools',
+    'accessories': 'Beauty Tools',
+    'beauty': 'Beauty Tools',
+    'skincare-creams': 'Skincare',
+    'creams': 'Skincare',
+    'serums': 'Skincare',
+    'cosmetics-nails': 'Nail Care',
+    'cosmetics': 'Makeup Essentials',
+    'nails': 'Nail Care',
+    'wellness-selfcare': 'Self-Care',
+    'wellness': 'Self-Care',
+    'selfcare': 'Self-Care',
+    'fashion-shoes': 'Self-Care',
+    'shoes': 'Self-Care',
+    'heels': 'Self-Care',
+    'fashion': 'Self-Care'
   };
   
   return mapping[handle.toLowerCase()] || 'All';
 }
 
 function matchProductToCategory(product, category) {
-  if (!product.productType) return false;
-  const pType = product.productType.toLowerCase();
-  const handle = product.handle.toLowerCase();
-  const title = product.title.toLowerCase();
+  if (!product.productType && !product.title) return false;
+  const handle = (product.handle || '').toLowerCase();
+  const title = (product.title || '').toLowerCase();
   const cat = category.toLowerCase();
 
-  // Exact matches
-  if (pType === cat) return true;
+  if (cat === 'all') return true;
 
-  // Lingerie & Nightwear
-  if (cat.includes('lingerie') || cat.includes('nightwear')) {
-    const keywords = ['lingerie', 'bra', 'babydoll', 'teddy', 'thong', 'panties', 'chemise', 'nightwear'];
-    return keywords.some(k => handle.includes(k) || title.includes(k));
+  if (cat === 'makeup essentials') {
+    return title.includes('mascara') || title.includes('cleaner') || title.includes('brush') || handle.includes('mascara') || handle.includes('brush');
+  }
+  if (cat === 'skincare') {
+    return title.includes('mask') || title.includes('massager') || title.includes('identifying') || title.includes('care') || handle.includes('mask') || handle.includes('massager') || handle.includes('identifier') || handle.includes('care');
+  }
+  if (cat === 'beauty tools') {
+    return title.includes('cleaner') || title.includes('massager') || title.includes('device') || title.includes('tool') || handle.includes('cleaner') || handle.includes('massager') || handle.includes('device') || handle.includes('tool');
+  }
+  if (cat === 'hair removal') {
+    return title.includes('removal') || title.includes('depilatory') || title.includes('identifying') || handle.includes('removal') || handle.includes('depilatory') || handle.includes('identifier');
+  }
+  if (cat === 'self-care') {
+    return title.includes('massager') || title.includes('mask') || title.includes('lingerie') || title.includes('babydoll') || title.includes('teddy') || handle.includes('massager') || handle.includes('mask') || handle.includes('lingerie') || handle.includes('babydoll') || handle.includes('teddy');
+  }
+  if (cat === 'nail care') {
+    return title.includes('nail') || title.includes('manicure') || title.includes('pedicure') || title.includes('massager') || title.includes('cleaner'); // placeholder
+  }
+  if (cat === 'best sellers') {
+    return product.rating >= 4.7 || handle.includes('cleaner') || handle.includes('identifier') || handle.includes('spray');
+  }
+  if (cat === 'new arrivals') {
+    return handle.includes('mascara') || handle.includes('mask') || handle.includes('teddy') || handle.includes('babydoll');
   }
 
-  // Beauty Tools & Accessories
-  if (cat.includes('beauty') || cat.includes('tool') || cat.includes('accessories')) {
-    const keywords = [
-      'brush-cleaner', 'makeup', 'massager', 'hair-identifier', 
-      'mascara', 'hair-removal', 'depilatory', 'ear-wax', 
-      'eyelash', 'skincare', 'cosmetics', 'brush', 'slimming'
-    ];
-    // Exclude lingerie
-    const isLingerie = ['lingerie', 'bra', 'babydoll', 'teddy', 'thong', 'panties', 'chemise', 'nightwear']
-      .some(k => handle.includes(k) || title.includes(k));
-    if (isLingerie) return false;
-
-    return pType.includes('beauty') || pType.includes('makeup') || pType.includes('cosmetics') || keywords.some(k => handle.includes(k) || title.includes(k));
-  }
-
-  // Wellness & Self-Care
-  if (cat.includes('wellness') || cat.includes('care')) {
-    const keywords = [
-      'tumbler', 'pilates', 'headband', 'fitness', 'bracelet', 
-      'massager', 'ear-wax', 'posture', 'spine', 'belt', 
-      'orthosis', 'health', 'relax', 'massage'
-    ];
-    // Exclude lingerie
-    const isLingerie = ['lingerie', 'bra', 'babydoll', 'teddy', 'thong', 'panties', 'chemise', 'nightwear']
-      .some(k => handle.includes(k) || title.includes(k));
-    if (isLingerie) return false;
-
-    // Exclude fashion/shoes/heels
-    const isFashionOrHeels = ['heels', 'shoes', 'jumpsuit', 'dress']
-      .some(k => handle.includes(k) || title.includes(k));
-    if (isFashionOrHeels) return false;
-
-    return pType.includes('wellness') || pType.includes('fitness') || pType.includes('lifestyle') || keywords.some(k => handle.includes(k) || title.includes(k));
-  }
-
-  // Fashion & Shoes
-  if (cat.includes('shoes') || cat.includes('fashion') || cat.includes('heel')) {
-    const keywords = ['heels', 'shoes', 'jumpsuit', 'bag', 'accessories', 'headband', 'jewelry', 'outfit', 'dress', 'doll', 'couple doll', 'decor'];
-    // Exclude lingerie
-    const isLingerie = ['lingerie', 'bra', 'babydoll', 'teddy', 'thong', 'panties', 'chemise', 'nightwear']
-      .some(k => handle.includes(k) || title.includes(k));
-    if (isLingerie) return false;
-
-    return pType.includes('fashion') || pType.includes('shoes') || pType.includes('lifestyle') || pType.includes('decor') || keywords.some(k => handle.includes(k) || title.includes(k));
-  }
-
-  return pType.includes(cat) || cat.includes(pType);
+  return false;
 }
 
 const renderStars = (rating) => {
@@ -112,10 +89,14 @@ const renderStars = (rating) => {
 
 const CATEGORIES = [
   'All',
-  'Lingerie & Nightwear',
-  'Beauty Tools & Accessories',
-  'Wellness & Self-Care',
-  'Fashion & Shoes'
+  'Makeup Essentials',
+  'Skincare',
+  'Beauty Tools',
+  'Hair Removal',
+  'Self-Care',
+  'Nail Care',
+  'Best Sellers',
+  'New Arrivals'
 ];
 
 export default function CollectionsPage() {
@@ -319,13 +300,13 @@ export default function CollectionsPage() {
   }
 
   return (
-    <div className="container" style={{ padding: '40px 24px 80px' }}>
+    <div className="container" style={{ padding: '20px 16px 80px' }}>
       
       {/* Title */}
-      <div style={{ marginBottom: '20px' }}>
-        <h1 style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--color-primary)', marginBottom: '8px' }}>All Products</h1>
-        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem' }}>
-          Showing {filteredProducts.length} premium dropshipping products
+      <div style={{ marginBottom: '14px' }}>
+        <h1 style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--color-primary)', marginBottom: '4px' }}>All Products</h1>
+        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
+          Showing {filteredProducts.length} products
         </p>
       </div>
 
@@ -620,12 +601,7 @@ export default function CollectionsPage() {
         <div>
           {paginatedProducts.length > 0 ? (
             <>
-              <div 
-                className="product-grid" 
-                style={{ 
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))'
-                }}
-              >
+              <div className="hp-products-grid">
                 {paginatedProducts.map(product => {
                   const discount = (product.compareAtPrice && product.compareAtPrice > product.minPrice)
                     ? Math.round(((product.compareAtPrice - product.minPrice) / product.compareAtPrice) * 100)
@@ -634,33 +610,31 @@ export default function CollectionsPage() {
                   return (
                     <div 
                       key={product.id} 
-                      className="product-card"
+                      className="hp-product-card"
                       onClick={() => navigate(`/products/${product.handle}`)}
                     >
                       {discount > 0 && (
-                        <span className="discount-badge">SAVE {discount}%</span>
+                        <span className="hp-card-badge">-{discount}%</span>
                       )}
-                      <div className="product-card-img-wrapper">
-                        <img src={product.images[0]} alt={product.title} className="product-card-img" />
+                      <div className="hp-card-img-wrap">
+                        <img src={product.images[0]} alt={product.title} className="hp-card-img" />
                       </div>
-                      <div className="product-card-body">
-                        <span className="product-card-type">{product.productType}</span>
-                        <h3 className="product-card-title">{product.title}</h3>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '4px 0 8px' }}>
-                          {renderStars(product.rating || 4.5)}
-                          <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>({product.ratingCount || 28})</span>
+                      <div className="hp-card-body">
+                        <span className="hp-card-type">{product.productType}</span>
+                        <h3 className="hp-card-title">{product.title}</h3>
+                        <div className="hp-card-stars">
+                          <span className="hp-stars-text">★★★★★</span>
+                          <span className="hp-review-count">({product.ratingCount || 28})</span>
                         </div>
-                        <div className="product-card-price-row">
-                          <span className="price-current">${product.minPrice.toFixed(2)}</span>
+                        <div className="hp-card-price-row">
+                          <span className="hp-price-now">${product.minPrice.toFixed(2)}</span>
                           {product.compareAtPrice > product.minPrice && (
-                            <span className="price-compare">${product.compareAtPrice.toFixed(2)}</span>
+                            <span className="hp-price-was">${product.compareAtPrice.toFixed(2)}</span>
                           )}
                         </div>
-
                         <button
-                          className="btn btn-primary btn-full"
+                          className="hp-card-cta"
                           onClick={(e) => handleAddProduct(e, product)}
-                          style={{ padding: '10px 16px', fontSize: '0.85rem' }}
                         >
                           Add to Cart
                         </button>

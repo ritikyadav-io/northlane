@@ -29,10 +29,10 @@ function generateReviews(handle, title) {
   const count = 16 + Math.floor(rng() * 72);
 
   const firstNames = [
-    'Sarah', 'James', 'Emily', 'Robert', 'Jessica', 'Daniel', 'Ashley', 'Michael',
-    'Megan', 'Chris', 'Amanda', 'David', 'Nicole', 'Andrew', 'Laura', 'Ryan',
-    'Rebecca', 'Kevin', 'Stephanie', 'Brian', 'Rachel', 'Tyler', 'Heather', 'Jason',
-    'Amber', 'Nathan', 'Hannah', 'Patrick', 'Olivia', 'Mark', 'Samantha', 'Alex'
+    'Sarah', 'Emily', 'Jessica', 'Ashley', 'Megan', 'Amanda', 'Nicole', 'Laura',
+    'Rebecca', 'Stephanie', 'Rachel', 'Heather', 'Amber', 'Hannah', 'Olivia', 'Samantha',
+    'Chloe', 'Sophia', 'Emma', 'Isabella', 'Mia', 'Charlotte', 'Amelia', 'Evelyn',
+    'Abigail', 'Harper', 'Elizabeth', 'Sofia', 'Avery', 'Ella', 'Madison', 'Scarlett'
   ];
   const lastInitials = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const locations = [
@@ -381,14 +381,7 @@ export default function ProductPage({ handle }) {
   return (
     <div className="container product-page-container" style={{ padding: '30px 24px 80px' }}>
 
-      {/* Back Button */}
-      <button onClick={goBack} className="back-btn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="19" y1="12" x2="5" y2="12"></line>
-          <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-        Go Back
-      </button>
+
 
       {/* Top Section */}
       <div className="product-detail-layout">

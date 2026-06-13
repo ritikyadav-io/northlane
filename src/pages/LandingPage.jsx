@@ -310,7 +310,7 @@ export default function LandingPage() {
               <p className="section-subtitle">Our most loved products, chosen by customers across the United States</p>
             </div>
             
-            <div className="product-grid" style={{ overflowX: 'auto', display: 'grid', gridAutoFlow: 'column', gridTemplateColumns: 'none', gap: '20px', paddingBottom: '16px' }} className="product-grid-best-sellers">
+            <div className="product-grid product-grid-best-sellers">
               {bestSellers.map(bestProduct => {
                 const discount = (bestProduct.compareAtPrice && bestProduct.compareAtPrice > bestProduct.minPrice) 
                   ? Math.round(((bestProduct.compareAtPrice - bestProduct.minPrice) / bestProduct.compareAtPrice) * 100)
@@ -584,7 +584,7 @@ export default function LandingPage() {
 
             <div className="review-card">
               <div className="review-card-header">
-                <span className="reviewer-name">James L.</span>
+                <span className="reviewer-name">Jessica L.</span>
                 <span className="reviewer-loc">Los Angeles, USA</span>
               </div>
               <div className="star-rating">★★★★★</div>
@@ -608,7 +608,7 @@ export default function LandingPage() {
 
             <div className="review-card">
               <div className="review-card-header">
-                <span className="reviewer-name">Robert T.</span>
+                <span className="reviewer-name">Rebecca T.</span>
                 <span className="reviewer-loc">Boston, USA</span>
               </div>
               <div className="star-rating">★★★★★</div>

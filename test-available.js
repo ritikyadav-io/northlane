@@ -5,12 +5,13 @@ const ENDPOINT = `https://${DOMAIN}/api/${API_VERSION}/graphql.json`;
 
 const testQuery = `
   query getProducts {
-    products(first: 30) {
+    products(first: 100) {
       edges {
         node {
           id
           title
           handle
+          productType
           availableForSale
         }
       }
