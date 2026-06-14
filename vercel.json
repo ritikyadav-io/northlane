@@ -1,5 +1,10 @@
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+  "version": 2,
+  "routes": [
+    { "src": "/products/[^/.]+", "dest": "/index.html" },
+    { "src": "/collections/[^/.]+", "dest": "/index.html" },
+    { "src": "/policies/[^/.]+", "dest": "/index.html" },
+    { "src": "/pages/[^/.]+", "dest": "/index.html" },
+    { "src": "/debug", "dest": "/index.html" }
   ]
 }
