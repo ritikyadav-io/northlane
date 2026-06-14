@@ -40,25 +40,38 @@ export function RouterProvider({ children }) {
   let routeParams = {};
   let currentView = 'home'; // 'home', 'product', 'collections', 'landing'
 
-  if (path === '/' || path === '') {
+  let cleanPath = path;
+  if (cleanPath.length > 1 && cleanPath.endsWith('/')) {
+    cleanPath = cleanPath.slice(0, -1);
+  }
+
+  if (cleanPath === '/' || cleanPath === '') {
     currentView = 'home';
-  } else if (path === '/debug') {
+  } else if (cleanPath === '/debug') {
     currentView = 'debug';
-  } else if (path.startsWith('/products/')) {
+  } else if (cleanPath.startsWith('/products/') || cleanPath === '/products') {
     currentView = 'product';
-    routeParams.handle = path.substring('/products/'.length);
-  } else if (path === '/collections/all' || path.startsWith('/collections/')) {
+    let handle = cleanPath.substring('/products/'.length) || '';
+    routeParams.handle = handle;
+    if (!handle) {
+      currentView = 'home';
+    }
+  } else if (cleanPath === '/collections' || cleanPath === '/collections/all' || cleanPath.startsWith('/collections/')) {
     currentView = 'collections';
-    routeParams.handle = path.substring('/collections/'.length) || 'all';
-  } else if (path === '/landing/tumbler') {
+    let handle = 'all';
+    if (cleanPath.startsWith('/collections/')) {
+      handle = cleanPath.substring('/collections/'.length) || 'all';
+    }
+    routeParams.handle = handle;
+  } else if (cleanPath === '/landing/tumbler') {
     currentView = 'landing';
-  } else if (path.startsWith('/policies/')) {
+  } else if (cleanPath.startsWith('/policies/') || cleanPath === '/policies') {
     currentView = 'policy';
-    routeParams.policyType = path.substring('/policies/'.length);
-  } else if (path === '/pages/contact') {
+    routeParams.policyType = cleanPath.substring('/policies/'.length) || 'privacy';
+  } else if (cleanPath === '/pages/contact') {
     currentView = 'policy';
     routeParams.policyType = 'contact';
-  } else if (path === '/pages/about' || path === '/pages/about-us') {
+  } else if (cleanPath === '/pages/about' || cleanPath === '/pages/about-us') {
     currentView = 'about';
   } else {
     // Fallback to home
