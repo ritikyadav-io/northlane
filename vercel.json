@@ -1,11 +1,5 @@
 {
-  "version": 2,
-  "cleanUrls": true,
   "rewrites": [
-    { "source": "/products/:path*", "destination": "/index.html" },
-    { "source": "/collections/:path*", "destination": "/index.html" },
-    { "source": "/policies/:path*", "destination": "/index.html" },
-    { "source": "/pages/:path*", "destination": "/index.html" },
-    { "source": "/debug", "destination": "/index.html" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
